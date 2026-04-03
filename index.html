@@ -499,7 +499,7 @@
       font-size: 0.95rem;
       line-height: 1.6;
       padding: 12px 14px;
-      resize: vertical;
+      resize: none;
       min-height: 130px;
       width: 100%;
       transition: border-color 0.15s;
@@ -1680,13 +1680,16 @@
 
   function startEditAnswer() {
     const q = shuffled[currentIndex];
-    document.getElementById('my-answer').value = q.userAnswer || '';
+    const ta = document.getElementById('my-answer');
+    ta.value = q.userAnswer || '';
+    ta.style.height = 'auto';
+    ta.style.height = (ta.scrollHeight || 130) + 'px';
     document.getElementById('read-section').style.display = 'none';
     document.getElementById('write-section').style.display = '';
     document.getElementById('btn-cancel-edit').style.display = 'inline-block';
     document.getElementById('reveal-section').classList.remove('shown');
     document.getElementById('practice-card').classList.add('is-editing');
-    document.getElementById('my-answer').focus();
+    ta.focus();
   }
 
   function cancelEditAnswer() {
@@ -2009,6 +2012,14 @@
   })();
 
   init();
+
+  // Auto-expand textarea so typed text is never hidden behind the Save button
+  const myAnswerTA = document.getElementById('my-answer');
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+  myAnswerTA.addEventListener('input', () => autoResize(myAnswerTA));
 </script>
 </body>
 </html>
