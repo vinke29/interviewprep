@@ -1060,9 +1060,9 @@
     try {
       let res;
       if (isSignup) {
+        // Sign up, then immediately sign in (no email confirmation needed)
         res = await supabaseAuth('signup', { email, password });
         if (res.ok) {
-          // Auto sign in after signup
           res = await supabaseAuth('token?grant_type=password', { email, password });
         }
       } else {
@@ -1090,8 +1090,12 @@
         }).catch(() => {});
       } else {
         const err = await res.json();
-        const msg = err.msg || err.error_description || err.message || '';
-        showLoginError(msg || (isSignup ? 'Could not create account.' : 'Incorrect email or password.'));
+        const msg = (err.msg || err.error_description || err.message || '').toLowerCase();
+        const friendly = msg.includes('rate limit') ? 'Too many attempts — please wait a minute and try again.'
+          : msg.includes('invalid') || msg.includes('credentials') ? 'Incorrect email or password.'
+          : msg.includes('already') ? 'An account with this email already exists. Try Sign In instead.'
+          : (isSignup ? 'Could not create account. Please try again.' : 'Incorrect email or password.');
+        showLoginError(friendly);
         btn.textContent = isSignup ? 'Create Account' : 'Sign In';
         btn.disabled = false;
       }
