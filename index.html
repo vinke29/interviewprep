@@ -122,35 +122,20 @@
     .nav-tab:hover { color: var(--text); }
     .nav-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
 
-    /* SYNC UI */
-    .sync-area {
+    /* AUTH NAV */
+    .nav-auth-area {
       margin-left: auto;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
     }
 
-    .sync-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-      flex-shrink: 0;
-      transition: background 0.3s;
+    .nav-user-email {
+      font-size: 0.78rem;
+      color: var(--text-dim);
     }
 
-    .sync-idle  { background: var(--border); }
-    .sync-ok    { background: var(--green); }
-    .sync-error { background: var(--red); }
-    .sync-syncing { background: var(--accent); animation: sync-spin 0.8s linear infinite; }
-
-    @keyframes sync-spin {
-      0%   { transform: scale(1); opacity: 1; }
-      50%  { transform: scale(0.5); opacity: 0.4; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .sync-code-btn {
+    .nav-signout-btn {
       background: none;
       border: none;
       color: var(--text-dim);
@@ -164,80 +149,91 @@
       text-decoration-color: var(--border);
       transition: color 0.15s;
     }
-    .sync-code-btn:hover { color: var(--text); }
+    .nav-signout-btn:hover { color: var(--text); }
 
-    /* Sync modal */
-    .sync-overlay {
+    /* SYNC DOT */
+    .sync-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .sync-idle    { background: var(--border); }
+    .sync-ok      { background: var(--green); }
+    .sync-error   { background: var(--red); }
+    .sync-syncing { background: var(--accent); animation: sync-spin 0.8s linear infinite; }
+
+    @keyframes sync-spin {
+      0%   { transform: scale(1); opacity: 1; }
+      50%  { transform: scale(0.5); opacity: 0.4; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* LOGIN SCREEN */
+    .login-screen {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.55);
-      z-index: 50;
-      align-items: flex-start;
-      justify-content: flex-end;
-      padding: 56px 28px 0;
+      background: var(--bg);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
     }
-    .sync-overlay.open { display: flex; }
+    .login-screen.show { display: flex; }
 
-    .sync-modal {
+    .login-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      width: 300px;
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      gap: 20px;
     }
 
-    .sync-modal-title {
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: var(--text);
-    }
-
-    .sync-modal-code {
-      font-family: monospace;
-      font-size: 1.25rem;
-      letter-spacing: 2px;
+    .login-logo {
+      font-size: 1.1rem;
+      font-weight: 800;
       color: var(--accent);
-      background: var(--surface2);
-      border-radius: 8px;
-      padding: 10px 14px;
-      text-align: center;
     }
 
-    .sync-modal-label {
-      font-size: 0.75rem;
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .login-subtitle {
+      font-size: 0.88rem;
       color: var(--text-dim);
-      line-height: 1.4;
+      line-height: 1.5;
+      margin-top: -8px;
     }
 
-    .sync-modal-divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 0;
+    .login-sent {
+      display: none;
+      text-align: center;
+      padding: 12px 0;
     }
 
-    .sync-modal-input {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-size: 0.9rem;
-      font-family: monospace;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      width: 100%;
-      outline: none;
+    .login-sent-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
     }
-    .sync-modal-input:focus { border-color: var(--accent); }
 
-    .sync-modal-btns {
-      display: flex;
-      gap: 8px;
+    .login-sent-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .login-sent-sub {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
     }
 
     /* VIEWS */
@@ -689,29 +685,35 @@
 </head>
 <body>
 
-<!-- Layer 1: always visible app bar -->
-<div class="nav-layer" id="nav-app">
-  <span class="nav-logo">&#9654; Interview Prep</span>
-  <div class="sync-area">
-    <span class="sync-dot sync-idle" id="sync-dot"></span>
-    <button class="sync-code-btn" onclick="showSyncModal()">Sync Code</button>
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">&#9654; Interview Prep</div>
+    <div>
+      <div class="login-title">Sign in</div>
+      <div class="login-subtitle">Enter your email and we'll send you a magic link — no password needed.</div>
+    </div>
+    <div id="login-form-area">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email" />
+        <button class="btn-primary" style="width:100%;" onclick="sendMagicLink()">Send Magic Link</button>
+      </div>
+    </div>
+    <div class="login-sent" id="login-sent">
+      <div class="login-sent-icon">&#9993;</div>
+      <div class="login-sent-title">Check your inbox</div>
+      <div class="login-sent-sub" id="login-sent-sub"></div>
+    </div>
   </div>
 </div>
 
-<!-- Sync modal overlay -->
-<div class="sync-overlay" id="sync-overlay" onclick="closeSyncModal(event)">
-  <div class="sync-modal" onclick="event.stopPropagation()">
-    <div class="sync-modal-title">Your Sync Code</div>
-    <div class="sync-modal-code" id="sync-modal-code"></div>
-    <div class="sync-modal-label">Share this code on another device to sync your data. Anyone with this code can see your answers.</div>
-    <div class="sync-modal-btns">
-      <button class="btn-primary" style="flex:1;font-size:0.82rem;padding:8px 0;" onclick="copySyncCode()">Copy Code</button>
-      <button class="btn-secondary" style="flex:1;font-size:0.82rem;padding:8px 0;" onclick="closeSyncModal()">Close</button>
-    </div>
-    <hr class="sync-modal-divider">
-    <div class="sync-modal-label">Enter a code from another device:</div>
-    <input class="sync-modal-input" id="sync-code-input" type="text" placeholder="XXXX-XXXX-XXXX" maxlength="14" />
-    <button class="btn-primary" style="width:100%;font-size:0.82rem;" onclick="applySyncCode(document.getElementById('sync-code-input').value)">Use This Code</button>
+<!-- Layer 1: always visible app bar -->
+<div class="nav-layer" id="nav-app">
+  <span class="nav-logo">&#9654; Interview Prep</span>
+  <div class="nav-auth-area" id="nav-auth-area" style="display:none;">
+    <span class="sync-dot sync-idle" id="sync-dot"></span>
+    <span class="nav-user-email" id="nav-user-email"></span>
+    <button class="nav-signout-btn" onclick="signOut()">Sign out</button>
   </div>
 </div>
 
@@ -871,7 +873,6 @@
 <script>
   const SETS_KEY = 'interview_sets';
   const LEGACY_KEY = 'amzn_cards';
-  const SYNC_KEY = 'interview_sync_id';
   const SUPABASE_URL = 'https://oviokriivseahlejxkms.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_EMVecbQ35x-yC_aSct3U2Q_joT7RZrs';
 
@@ -885,18 +886,8 @@
   // Hardcoded Amazon preset — used as fallback if localStorage is empty/broken
   const AMAZON_PRESET = [{"question":"Tell me about a time you had to deal with a difficult customer","lp":"Customer Obsession"},{"question":"Tell me about one of your projects where you put the customer first","lp":"Customer Obsession"},{"question":"Which company has the best customer service and why?","lp":"Customer Obsession"},{"question":"Describe a time when a customer asked you for one thing, but you knew that they needed something else","lp":"Customer Obsession"},{"question":"Tell me about a time you did something at work that wasn't your responsibility / in your job description","lp":"Ownership"},{"question":"Tell me about a time when you went over and above your job responsibility in order to help the company","lp":"Ownership"},{"question":"Tell me about a time when you had to make an important decision without approval from your boss","lp":"Ownership"},{"question":"How would you make Amazon.com better?","lp":"Invent and Simplify"},{"question":"Tell me about a time you had to make an urgent decision without data","lp":"Bias for Action"},{"question":"Tell me about a time when you launched a feature with known risks","lp":"Bias for Action"},{"question":"Tell me about a time when you found an opportunity that no one else saw","lp":"Think Big"},{"question":"Tell me about a time you had a conflict with a coworker or manager and how you approached it","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time your work was criticized","lp":"Earn Trust"},{"question":"Tell me about a time when people in your team didn't agree with you","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time you had a conflict with your team but decided to go ahead with their proposal","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time you re-designed a process and why","lp":"Invent and Simplify"},{"question":"Tell me about a time you solved a big problem in your company","lp":"Deliver Results"},{"question":"Tell me about a time when you had a plan but ran into some obstacles. What did you do about it?","lp":"Deliver Results"},{"question":"What is the most innovative idea you've ever had?","lp":"Invent and Simplify"},{"question":"Tell me about a project in which you had to deep dive into analysis","lp":"Dive Deep"},{"question":"Tell me about the most complex problem you have worked on","lp":"Dive Deep"},{"question":"Tell me about a time when you used a lot of data in a short period of time","lp":"Dive Deep"},{"question":"Tell me how you deal with ambiguity","lp":"Are Right A Lot"},{"question":"Tell me about a time when you were faced with a problem that had a number of possible solutions","lp":"Are Right A Lot"},{"question":"Tell me about a time you applied judgment to a decision when data was not available","lp":"Are Right A Lot"},{"question":"Tell me about a time you came across a scenario where the deadline given to you for a project was earlier than expected","lp":"Deliver Results"},{"question":"Tell me about the most challenging project you ever worked on","lp":"Deliver Results"},{"question":"Tell me about a time when you had to handle pressure","lp":"Deliver Results"},{"question":"Tell me about a time when you had two deadlines at the same time. How did you manage the situation?","lp":"Deliver Results"},{"question":"How do you prioritize tasks in your current role?","lp":"Deliver Results"},{"question":"Tell me about your most significant accomplishment. Why was it significant?","lp":"Deliver Results"},{"question":"Tell me about a time you proposed a non-intuitive solution to a problem and how you identified that it required a different way of thinking","lp":"Invent and Simplify"},{"question":"What was the largest project you've executed?","lp":"Think Big"},{"question":"Tell me about a time you provided feedback that was helpful to a peer","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you hired or worked with people smarter than you are","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you stepped in to help a struggling teammate","lp":"Hire and Develop the Best"},{"question":"Who is your best employee/resource, and what makes them the best?","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you successfully delivered a project with limited budget or resources","lp":"Frugality"},{"question":"Tell me about the last time you figured out a way to keep an approach simple or to save on expenses","lp":"Frugality"},{"question":"When managing a budget, what are some ways you get more out of less?","lp":"Frugality"},{"question":"Tell me about a time you had to learn something quickly","lp":"Learn and Be Curious"},{"question":"Tell me about your biggest career failure and what you learned from it","lp":"Learn and Be Curious"},{"question":"Tell me about a time you taught yourself a skill","lp":"Learn and Be Curious"},{"question":"Tell me about something you learned that made you better at your job","lp":"Learn and Be Curious"},{"question":"Tell me about the most successful project you've done","lp":"Insist on the Highest Standards"},{"question":"Tell me about a project that you wish you had done better, and how you would do it differently today","lp":"Insist on the Highest Standards"},{"question":"Tell me a time when you had a goal that was hard to achieve. What did you learn from that?","lp":"Insist on the Highest Standards"},{"question":"How would you improve this project on your resume if you had more time?","lp":"Insist on the Highest Standards"},{"question":"How do you earn trust with a team?","lp":"Earn Trust"},{"question":"Tell me a piece of difficult feedback you received and how you handled it","lp":"Earn Trust"},{"question":"A co-worker constantly arrives late to a recurring meeting. What would you do?","lp":"Earn Trust"},{"question":"How do you manage a low performer in the team?","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time that you went above and beyond for an employee","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time you saw an issue that would negatively impact your team. How did you deal with it?","lp":"Strive to be Earth's Best Employer"},{"question":"How do you identify a good performer in the team and help in their career growth?","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time when you made a decision that impacted the team or the company","lp":"Ownership"},{"question":"Tell me about a decision that you made about your work and you regret now","lp":"Learn and Be Curious"},{"question":"Tell me about a time when you failed to do the right thing","lp":"Success and Scale Bring Broad Responsibility"}];
 
-  // ── SUPABASE SYNC ─────────────────────────────────────────
-  function generateSyncId() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    const seg = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
-    return seg() + '-' + seg() + '-' + seg();
-  }
-
-  function getSyncId() {
-    let id = localStorage.getItem(SYNC_KEY);
-    if (!id) { id = generateSyncId(); localStorage.setItem(SYNC_KEY, id); }
-    return id;
-  }
+  // ── AUTH & SYNC ───────────────────────────────────────────
+  let currentSession = null; // Supabase session object
 
   function setSyncStatus(status) {
     const dot = document.getElementById('sync-dot');
@@ -904,30 +895,136 @@
     dot.className = 'sync-dot sync-' + status;
   }
 
+  // Raw fetch wrapper — uses session token when available, anon key otherwise
   async function supabaseFetch(path, options = {}) {
+    const token = currentSession ? currentSession.access_token : SUPABASE_ANON_KEY;
     const url = SUPABASE_URL + '/rest/v1/' + path;
     const headers = {
       'apikey': SUPABASE_ANON_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      'Authorization': 'Bearer ' + token,
       'Content-Type': 'application/json',
       ...(options.headers || {})
     };
     return fetch(url, { ...options, headers });
   }
 
+  // Auth API fetch (uses /auth/v1 endpoint)
+  async function supabaseAuth(path, body) {
+    return fetch(SUPABASE_URL + '/auth/v1/' + path, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+  }
+
+  // Send magic link email
+  async function sendMagicLink() {
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) { alert('Please enter your email.'); return; }
+    const btn = document.querySelector('#login-form-area .btn-primary');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+      const res = await supabaseAuth('magiclink', {
+        email,
+        options: { emailRedirectTo: 'https://interviewprep-rosy.vercel.app' }
+      });
+      if (res.ok) {
+        document.getElementById('login-form-area').style.display = 'none';
+        const sent = document.getElementById('login-sent');
+        sent.style.display = 'block';
+        document.getElementById('login-sent-sub').textContent =
+          'We sent a link to ' + email + '. Click it to sign in — it expires in 1 hour.';
+      } else {
+        const err = await res.json();
+        alert('Error: ' + (err.msg || err.message || 'Could not send link.'));
+        btn.textContent = 'Send Magic Link';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      alert('Network error. Please try again.');
+      btn.textContent = 'Send Magic Link';
+      btn.disabled = false;
+    }
+  }
+
+  // Exchange token from URL hash for a session
+  async function handleAuthCallback() {
+    const hash = window.location.hash;
+    if (!hash) return false;
+    const params = new URLSearchParams(hash.slice(1));
+    const accessToken = params.get('access_token');
+    const refreshToken = params.get('refresh_token');
+    if (!accessToken) return false;
+
+    // Store session
+    currentSession = { access_token: accessToken, refresh_token: refreshToken };
+    localStorage.setItem('sb_session', JSON.stringify(currentSession));
+
+    // Get user info
+    const res = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': 'Bearer ' + accessToken }
+    });
+    if (res.ok) {
+      const user = await res.json();
+      currentSession.user = user;
+      localStorage.setItem('sb_session', JSON.stringify(currentSession));
+    }
+
+    // Clean up URL
+    history.replaceState(null, '', window.location.pathname);
+    return true;
+  }
+
+  // Restore session from localStorage
+  function restoreSession() {
+    try {
+      const s = JSON.parse(localStorage.getItem('sb_session'));
+      if (s && s.access_token) { currentSession = s; return true; }
+    } catch(e) {}
+    return false;
+  }
+
+  // Sign out
+  async function signOut() {
+    if (currentSession) {
+      supabaseAuth('logout', {}).catch(() => {});
+    }
+    currentSession = null;
+    localStorage.removeItem('sb_session');
+    allSets = {};
+    localStorage.setItem(SETS_KEY, JSON.stringify({}));
+    activeSet = null; activeSetKey = '';
+    document.getElementById('nav-auth-area').style.display = 'none';
+    document.getElementById('login-screen').classList.add('show');
+    document.getElementById('login-form-area').style.display = '';
+    document.getElementById('login-sent').style.display = 'none';
+    const btn = document.querySelector('#login-form-area .btn-primary');
+    if (btn) { btn.textContent = 'Send Magic Link'; btn.disabled = false; }
+    document.getElementById('login-email').value = '';
+  }
+
+  // Show logged-in nav
+  function showAuthNav() {
+    const area = document.getElementById('nav-auth-area');
+    area.style.display = 'flex';
+    const email = currentSession && currentSession.user ? currentSession.user.email : '';
+    document.getElementById('nav-user-email').textContent = email;
+  }
+
   async function syncPushSet(key) {
+    if (!currentSession) return;
     const set = allSets[key];
     if (!set) return;
-    const syncId = getSyncId();
     setSyncStatus('syncing');
     try {
       const res = await supabaseFetch(
-        'interview_sets?on_conflict=sync_id,set_key',
+        'interview_sets?on_conflict=user_id,set_key',
         {
           method: 'POST',
           headers: { 'Prefer': 'resolution=merge-duplicates,return=minimal' },
           body: JSON.stringify({
-            sync_id: syncId,
+            user_id: currentSession.user.id,
             set_key: key,
             company: set.company,
             role: set.role || '',
@@ -945,12 +1042,10 @@
   }
 
   async function syncPullAll() {
-    const syncId = getSyncId();
+    if (!currentSession) return;
     setSyncStatus('syncing');
     try {
-      const res = await supabaseFetch(
-        'interview_sets?sync_id=eq.' + encodeURIComponent(syncId) + '&select=*'
-      );
+      const res = await supabaseFetch('interview_sets?select=*');
       if (!res.ok) { setSyncStatus('error'); return; }
       const rows = await res.json();
 
@@ -963,13 +1058,11 @@
             questions: row.questions
           };
         } else {
-          // Preserve non-empty local userAnswers; Supabase wins on everything else
           const localAnswerMap = {};
           local.questions.forEach(q => { if (q.userAnswer) localAnswerMap[q.id] = q.userAnswer; });
           const mergedQs = row.questions.map(q => ({
             ...q, userAnswer: localAnswerMap[q.id] || q.userAnswer || ''
           }));
-          // Append locally-added questions not yet in Supabase
           const remoteIds = new Set(row.questions.map(q => q.id));
           local.questions.filter(q => !remoteIds.has(q.id)).forEach(q => mergedQs.push(q));
           allSets[row.set_key] = {
@@ -994,48 +1087,13 @@
   }
 
   async function syncDeleteSet(key) {
-    const syncId = getSyncId();
+    if (!currentSession) return;
     try {
       await supabaseFetch(
-        'interview_sets?sync_id=eq.' + encodeURIComponent(syncId) + '&set_key=eq.' + encodeURIComponent(key),
+        'interview_sets?set_key=eq.' + encodeURIComponent(key),
         { method: 'DELETE', headers: { 'Prefer': 'return=minimal' } }
       );
     } catch(e) {}
-  }
-
-  function showSyncModal() {
-    document.getElementById('sync-modal-code').textContent = getSyncId();
-    document.getElementById('sync-code-input').value = '';
-    document.getElementById('sync-overlay').classList.add('open');
-  }
-
-  function closeSyncModal(e) {
-    if (e && e.target !== document.getElementById('sync-overlay')) return;
-    document.getElementById('sync-overlay').classList.remove('open');
-  }
-
-  function copySyncCode() {
-    const code = getSyncId();
-    navigator.clipboard.writeText(code).then(() => showToast('Sync code copied!')).catch(() => showToast(code));
-  }
-
-  async function applySyncCode(raw) {
-    const code = (raw || '').trim().toUpperCase();
-    if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
-      alert('Invalid sync code. Expected format: XXXX-XXXX-XXXX');
-      return;
-    }
-    if (!confirm('Switch to sync code ' + code + '?\n\nYour local data will be replaced with data from that code.')) return;
-    localStorage.setItem(SYNC_KEY, code);
-    allSets = {};
-    localStorage.setItem(SETS_KEY, JSON.stringify({}));
-    document.getElementById('sync-overlay').classList.remove('open');
-    await syncPullAll();
-    loadSets();
-    const keys = Object.keys(allSets);
-    if (keys.length === 1) { activeSetKey = keys[0]; activeSet = allSets[keys[0]]; }
-    else { activeSet = null; activeSetKey = ''; }
-    showView(activeSet ? 'practice' : 'home');
   }
 
   // ── STORAGE ──────────────────────────────────────────────
@@ -1499,31 +1557,51 @@
   }
 
   // ── INIT ──────────────────────────────────────────────────
-  loadSets();
-  // If only one set exists, auto-load it
-  const savedKeys = Object.keys(allSets);
-  if (savedKeys.length === 1) {
-    activeSetKey = savedKeys[0];
-    activeSet = allSets[activeSetKey];
-  }
-  showView(activeSet ? 'practice' : 'home');
+  async function init() {
+    // 1. Check for magic link callback in URL hash
+    const fromCallback = await handleAuthCallback();
 
-  // Pull from Supabase in background — re-render when done
-  syncPullAll().then(() => {
+    // 2. Restore or verify session
+    if (!fromCallback) restoreSession();
+
+    if (!currentSession) {
+      // Not logged in — show login screen
+      document.getElementById('login-screen').classList.add('show');
+      return;
+    }
+
+    // 3. Logged in — show app
+    document.getElementById('login-screen').classList.remove('show');
+    showAuthNav();
+
+    // 4. Load from localStorage immediately for instant render
     loadSets();
-    if (activeSetKey && allSets[activeSetKey]) {
-      activeSet = allSets[activeSetKey];
-    } else if (Object.keys(allSets).length === 1) {
-      activeSetKey = Object.keys(allSets)[0];
+    const savedKeys = Object.keys(allSets);
+    if (savedKeys.length === 1) {
+      activeSetKey = savedKeys[0];
       activeSet = allSets[activeSetKey];
     }
-    const av = document.querySelector('.view.active');
-    if (av) {
-      if (av.id === 'view-home') renderHome();
-      else if (av.id === 'view-practice') renderPractice();
-      else if (av.id === 'view-all') renderAll();
-    }
-  }).catch(() => {});
+    showView(activeSet ? 'practice' : 'home');
+
+    // 5. Pull from Supabase in background and re-render
+    syncPullAll().then(() => {
+      loadSets();
+      if (activeSetKey && allSets[activeSetKey]) {
+        activeSet = allSets[activeSetKey];
+      } else if (Object.keys(allSets).length === 1) {
+        activeSetKey = Object.keys(allSets)[0];
+        activeSet = allSets[activeSetKey];
+      }
+      const av = document.querySelector('.view.active');
+      if (av) {
+        if (av.id === 'view-home') renderHome();
+        else if (av.id === 'view-practice') renderPractice();
+        else if (av.id === 'view-all') renderAll();
+      }
+    }).catch(() => {});
+  }
+
+  init();
 </script>
 </body>
 </html>
