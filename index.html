@@ -1132,9 +1132,11 @@
     try { allSets = JSON.parse(localStorage.getItem(SETS_KEY)) || {}; }
     catch { allSets = {}; }
 
-    // Repair amazon| if missing or has empty questions (migration may have run before questions existed)
+    // Seed Amazon questions only for the original account
+    const userEmail = currentSession && currentSession.user ? currentSession.user.email : '';
     const existing = allSets['amazon|'];
-    const needsRepair = !existing || !existing.questions || existing.questions.length === 0;
+    const needsRepair = userEmail === 'ignaciovinke@gmail.com' &&
+      (!existing || !existing.questions || existing.questions.length === 0);
     if (needsRepair) {
       // Try legacy format first
       let questions = null;
