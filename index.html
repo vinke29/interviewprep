@@ -717,6 +717,10 @@
 
     /* ── MOBILE ── */
     @media (max-width: 600px) {
+      /* Prevent any element from overflowing the viewport width */
+      body { overflow-x: hidden; }
+      .view { padding-left: 14px; padding-right: 14px; box-sizing: border-box; width: 100%; }
+
       /* Nav */
       .nav-layer { padding: 0 14px; }
       .nav-logo { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -728,10 +732,10 @@
       .nav-tab { padding: 0 10px; font-size: 0.78rem; }
 
       /* Practice card: stack badges above question instead of beside it */
-      .card { padding: 20px 16px; gap: 16px; }
+      .card { padding: 20px 14px; gap: 16px; width: 100%; box-sizing: border-box; }
       .card-header { flex-direction: column; gap: 10px; }
       .question-text { font-size: 1.05rem; order: 2; }
-      .badge-row { order: 1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; }
+      .badge-row { order: 1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; flex-wrap: wrap; }
 
       /* Swipe hint row replaces the standalone Next button */
       .swipe-hint { display: flex !important; }
@@ -1843,8 +1847,8 @@
       const dy = e.changedTouches[0].clientY - touchStartY;
       const dt = Date.now() - touchStartTime;
       const speed = Math.abs(dx) / dt; // px/ms
-      // Trigger if: clearly horizontal, 50px+ travel OR fast flick
-      if (Math.abs(dx) > Math.abs(dy) * 1.8 && (Math.abs(dx) > 50 || speed > 0.3)) {
+      // Trigger if horizontal is dominant AND (25px+ travel OR any flick)
+      if (Math.abs(dx) > Math.abs(dy) && (Math.abs(dx) > 25 || speed > 0.15)) {
         if (dx < 0) nextCard();
         else prevCard();
       }
