@@ -275,6 +275,12 @@
     .view.active { display: flex; flex-direction: column; gap: 20px; }
     body.in-set .view { padding-top: 32px; }
 
+    /* Practice view is the scroll container; body scroll is locked in JS */
+    #view-practice.active { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+    /* Gap between textarea and Save button */
+    #write-section { display: flex; flex-direction: column; gap: 14px; }
+
     /* ── HOME VIEW ── */
     .home-hero {
       text-align: center;
@@ -1412,6 +1418,9 @@
   function showView(name) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('view-' + name).classList.add('active');
+    // Lock body scroll in practice so the background can't scroll;
+    // the view itself is overflow-y: auto and acts as the scroll container.
+    document.body.style.overflow = (name === 'practice') ? 'hidden' : '';
 
     const inSet = !!activeSet;
     document.getElementById('nav-company-bar').style.display = inSet ? 'flex' : 'none';
@@ -2006,6 +2015,16 @@
   })();
 
   init();
+
+  // On iOS, add bottom padding to the practice view equal to the keyboard height
+  // so the Save Answer button can always be scrolled above the keyboard.
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function() {
+      const keyboardHeight = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
+      const vp = document.getElementById('view-practice');
+      vp.style.paddingBottom = keyboardHeight > 100 ? (keyboardHeight + 16) + 'px' : '';
+    });
+  }
 
   // Auto-expand textarea so typed text is never hidden behind the Save button
   const myAnswerTA = document.getElementById('my-answer');
