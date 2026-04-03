@@ -419,6 +419,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      will-change: transform;
     }
 
     .card-meta {
@@ -1820,37 +1821,81 @@
 
   // ── SWIPE NAVIGATION ─────────────────────────────────────
   (function() {
-    let touchStartX = 0;
-    let touchStartY = 0;
-    let touchStartTime = 0;
-    let swipeActive = false;
-
+    let startX = 0, startY = 0;
+    let isDragging = false, isAnimating = false;
+    const THRESHOLD = 72; // px to commit the swipe
     const card = document.getElementById('practice-card');
 
     card.addEventListener('touchstart', function(e) {
-      // Don't track swipes that begin on interactive elements
       const tag = e.target.tagName;
-      if (tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'INPUT') {
-        swipeActive = false;
-        return;
-      }
-      touchStartX = e.changedTouches[0].clientX;
-      touchStartY = e.changedTouches[0].clientY;
-      touchStartTime = Date.now();
-      swipeActive = true;
+      if (tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'INPUT') return;
+      if (isAnimating) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      isDragging = false;
     }, { passive: true });
 
+    card.addEventListener('touchmove', function(e) {
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+
+      if (!isDragging) {
+        // Need enough movement to determine intent
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        // Vertical gesture — let page scroll normally
+        if (Math.abs(dy) > Math.abs(dx)) return;
+        isDragging = true;
+      }
+
+      if (isDragging) {
+        e.preventDefault(); // stop page scroll while we handle the drag
+        const rotate = dx * 0.04;
+        const opacity = 1 - Math.min(Math.abs(dx) / 320, 0.35);
+        card.style.transition = 'none';
+        card.style.transform = `translateX(${dx * 0.88}px) rotate(${rotate}deg)`;
+        card.style.opacity = opacity;
+      }
+    }, { passive: false });
+
     card.addEventListener('touchend', function(e) {
-      if (!swipeActive) return;
-      swipeActive = false;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      const dt = Date.now() - touchStartTime;
-      const speed = Math.abs(dx) / dt; // px/ms
-      // Trigger if horizontal is dominant AND (25px+ travel OR any flick)
-      if (Math.abs(dx) > Math.abs(dy) && (Math.abs(dx) > 25 || speed > 0.15)) {
-        if (dx < 0) nextCard();
-        else prevCard();
+      if (!isDragging) return;
+      isDragging = false;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dt = Date.now();
+
+      if (Math.abs(dx) >= THRESHOLD) {
+        // Commit — fly card off screen
+        isAnimating = true;
+        const flyX = dx < 0 ? -window.innerWidth : window.innerWidth;
+        const flyR = dx < 0 ? -18 : 18;
+        card.style.transition = 'transform 0.22s ease-in, opacity 0.22s ease-in';
+        card.style.transform = `translateX(${flyX}px) rotate(${flyR}deg)`;
+        card.style.opacity = '0';
+
+        setTimeout(function() {
+          // Snap to opposite edge instantly, load new card, slide in
+          const entryX = dx < 0 ? window.innerWidth : -window.innerWidth;
+          card.style.transition = 'none';
+          card.style.transform = `translateX(${entryX}px) rotate(0deg)`;
+          card.style.opacity = '0';
+
+          if (dx < 0) nextCard(); else prevCard();
+
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              card.style.transition = 'transform 0.24s ease-out, opacity 0.18s ease-out';
+              card.style.transform = 'translateX(0) rotate(0)';
+              card.style.opacity = '1';
+              setTimeout(function() { isAnimating = false; }, 240);
+            });
+          });
+        }, 220);
+
+      } else {
+        // Not far enough — spring back with slight overshoot
+        card.style.transition = 'transform 0.35s cubic-bezier(0.34,1.4,0.64,1), opacity 0.2s ease';
+        card.style.transform = 'translateX(0) rotate(0)';
+        card.style.opacity = '1';
       }
     }, { passive: true });
   })();
