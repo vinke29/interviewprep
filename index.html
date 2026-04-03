@@ -743,12 +743,12 @@
         <input class="login-input" id="login-password" type="password" placeholder="Password"
           autocomplete="current-password" onkeydown="if(event.key==='Enter') loginWithPassword()" />
         <button id="login-btn" class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="loginWithPassword()">Sign In</button>
-        <div style="display:flex;align-items:center;gap:10px;">
+        <div id="login-or-magic" style="display:flex;align-items:center;gap:10px;">
           <hr style="flex:1;border:none;border-top:1px solid var(--border);">
           <span style="font-size:0.75rem;color:var(--text-dim);">or</span>
           <hr style="flex:1;border:none;border-top:1px solid var(--border);">
         </div>
-        <button class="btn-secondary" style="width:100%;padding:10px 0;font-size:0.88rem;" onclick="switchToMagicLink()">Send Magic Link Instead</button>
+        <button id="login-magic-toggle" class="btn-secondary" style="width:100%;padding:10px 0;font-size:0.88rem;" onclick="switchToMagicLink()">Send Magic Link Instead</button>
       </div>
       <div id="login-magic-row" style="display:none;flex-direction:column;gap:12px;">
         <button id="login-magic-btn" class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="sendMagicLink()">Send Magic Link</button>
@@ -1024,9 +1024,12 @@
     document.getElementById('tab-signin').style.color = isSignup ? 'var(--text-dim)' : '#000';
     document.getElementById('tab-signup').style.background = isSignup ? 'var(--accent)' : 'transparent';
     document.getElementById('tab-signup').style.color = isSignup ? '#000' : 'var(--text-dim)';
-    // Hide magic link in signup mode
+    // Show password row, hide magic row
     document.getElementById('login-password-row').style.display = 'flex';
     document.getElementById('login-magic-row').style.display = 'none';
+    // Hide "magic link" option on Create Account tab
+    document.getElementById('login-or-magic').style.display = isSignup ? 'none' : 'flex';
+    document.getElementById('login-magic-toggle').style.display = isSignup ? 'none' : '';
   }
 
   function switchToMagicLink() {
@@ -1039,7 +1042,8 @@
   function switchToPassword() {
     document.getElementById('login-magic-row').style.display = 'none';
     document.getElementById('login-password-row').style.display = 'flex';
-    document.getElementById('login-subtitle').textContent = 'Sign in with your password or get a magic link sent to your email.';
+    document.getElementById('login-or-magic').style.display = 'flex';
+    document.getElementById('login-magic-toggle').style.display = '';
     clearLoginError();
   }
 
