@@ -30,6 +30,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overscroll-behavior: none;
     }
 
     /* NAV — 3 layers */
@@ -1562,12 +1563,10 @@
     document.getElementById('my-answer').value = q.userAnswer || '';
     document.getElementById('reveal-section').classList.remove('shown');
 
-    const hasUserAnswer = !!q.userAnswer;
     const hasSample = !!q.sampleAnswer;
-    document.getElementById('btn-reveal').textContent =
-      (!hasUserAnswer && !hasSample) ? 'Save Answer' :
-      (!hasSample && hasUserAnswer) ? 'Save Answer' :
-      'Reveal Sample Answer';
+    const btnReveal = document.getElementById('btn-reveal');
+    btnReveal.textContent = hasSample ? 'Reveal Sample Answer' : 'Save Answer';
+    btnReveal.style.display = '';
 
     // Progress
     const answered = activeSet.questions.filter(x => x.userAnswer).length;
@@ -1604,11 +1603,14 @@
       document.getElementById('progress-label').textContent = `${answered} / ${total} answered`;
       document.getElementById('progress-fill').style.width = (answered / total * 100) + '%';
 
-      document.getElementById('btn-reveal').textContent = 'Reveal Sample Answer';
+      if (q.sampleAnswer) document.getElementById('btn-reveal').textContent = 'Reveal Sample Answer';
       showToast('Answer saved!');
     }
 
-    document.getElementById('reveal-section').classList.add('shown');
+    // Only open the reveal section if there's actually a sample answer
+    if (q.sampleAnswer) {
+      document.getElementById('reveal-section').classList.add('shown');
+    }
   }
 
   function nextCard() {
@@ -1849,6 +1851,7 @@
 
       if (isDragging) {
         e.preventDefault(); // stop page scroll while we handle the drag
+        card.style.touchAction = 'none'; // belt-and-suspenders for iOS
         const rotate = dx * 0.04;
         const opacity = 1 - Math.min(Math.abs(dx) / 320, 0.35);
         card.style.transition = 'none';
@@ -1860,6 +1863,7 @@
     card.addEventListener('touchend', function(e) {
       if (!isDragging) return;
       isDragging = false;
+      card.style.touchAction = ''; // restore normal touch handling
       const dx = e.changedTouches[0].clientX - startX;
       const dt = Date.now();
 
