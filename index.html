@@ -723,13 +723,27 @@
   <div class="login-card">
     <div class="login-logo">&#9654; Interview Prep</div>
     <div class="login-heading">
-      <div class="login-title">Sign in</div>
-      <div class="login-subtitle">Enter your email and we'll send you a magic link — no password needed.</div>
+      <div class="login-title" id="login-title">Sign in</div>
+      <div class="login-subtitle" id="login-subtitle">Sign in with your password or get a magic link sent to your email.</div>
     </div>
     <div class="login-fields" id="login-form-area">
       <input class="login-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email"
-        onkeydown="if(event.key==='Enter') sendMagicLink()" />
-      <button id="login-btn" class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="sendMagicLink()">Send Magic Link</button>
+        onkeydown="if(event.key==='Enter') loginWithPassword()" />
+      <div id="login-password-row" style="display:flex;flex-direction:column;gap:12px;">
+        <input class="login-input" id="login-password" type="password" placeholder="Password"
+          autocomplete="current-password" onkeydown="if(event.key==='Enter') loginWithPassword()" />
+        <button id="login-btn" class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="loginWithPassword()">Sign In</button>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <hr style="flex:1;border:none;border-top:1px solid var(--border);">
+          <span style="font-size:0.75rem;color:var(--text-dim);">or</span>
+          <hr style="flex:1;border:none;border-top:1px solid var(--border);">
+        </div>
+        <button class="btn-secondary" style="width:100%;padding:10px 0;font-size:0.88rem;" onclick="switchToMagicLink()">Send Magic Link Instead</button>
+      </div>
+      <div id="login-magic-row" style="display:none;flex-direction:column;gap:12px;">
+        <button id="login-magic-btn" class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="sendMagicLink()">Send Magic Link</button>
+        <button class="btn-secondary" style="width:100%;padding:10px 0;font-size:0.88rem;" onclick="switchToPassword()">Use Password Instead</button>
+      </div>
     </div>
     <div class="login-sent" id="login-sent">
       <div class="login-sent-icon">&#9993;&#65039;</div>
@@ -985,6 +999,79 @@
     }
   }
 
+  function switchToMagicLink() {
+    document.getElementById('login-password-row').style.display = 'none';
+    document.getElementById('login-magic-row').style.display = 'flex';
+    document.getElementById('login-subtitle').textContent = 'Enter your email and we\'ll send you a one-click sign-in link.';
+    clearLoginError();
+  }
+
+  function switchToPassword() {
+    document.getElementById('login-magic-row').style.display = 'none';
+    document.getElementById('login-password-row').style.display = 'flex';
+    document.getElementById('login-subtitle').textContent = 'Sign in with your password or get a magic link sent to your email.';
+    clearLoginError();
+  }
+
+  async function loginWithPassword() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    if (!email) { showLoginError('Please enter your email.'); return; }
+    if (!password) { showLoginError('Please enter your password.'); return; }
+    const btn = document.getElementById('login-btn');
+    btn.textContent = 'Signing in...';
+    btn.disabled = true;
+    clearLoginError();
+    try {
+      // Try sign in first
+      let res = await supabaseAuth('token?grant_type=password', { email, password });
+      if (res.status === 400) {
+        // Account may not exist — try sign up
+        const signupRes = await supabaseAuth('signup', { email, password });
+        if (signupRes.ok) {
+          // Try sign in again after signup
+          res = await supabaseAuth('token?grant_type=password', { email, password });
+        } else {
+          const err = await signupRes.json();
+          showLoginError(err.msg || err.message || 'Incorrect email or password.');
+          btn.textContent = 'Sign In';
+          btn.disabled = false;
+          return;
+        }
+      }
+      if (res.ok) {
+        const data = await res.json();
+        currentSession = { access_token: data.access_token, refresh_token: data.refresh_token, user: data.user };
+        localStorage.setItem('sb_session', JSON.stringify(currentSession));
+        document.getElementById('login-screen').classList.remove('show');
+        showAuthNav();
+        loadSets();
+        const keys = Object.keys(allSets);
+        if (keys.length === 1) { activeSetKey = keys[0]; activeSet = allSets[keys[0]]; }
+        showView(activeSet ? 'practice' : 'home');
+        syncPullAll().then(() => {
+          loadSets();
+          if (activeSetKey && allSets[activeSetKey]) activeSet = allSets[activeSetKey];
+          const av = document.querySelector('.view.active');
+          if (av) {
+            if (av.id === 'view-home') renderHome();
+            else if (av.id === 'view-practice') renderPractice();
+            else if (av.id === 'view-all') renderAll();
+          }
+        }).catch(() => {});
+      } else {
+        const err = await res.json();
+        showLoginError(err.msg || err.error_description || err.message || 'Incorrect email or password.');
+        btn.textContent = 'Sign In';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      showLoginError('Network error. Please try again.');
+      btn.textContent = 'Sign In';
+      btn.disabled = false;
+    }
+  }
+
   function showLoginError(msg) {
     let el = document.getElementById('login-error');
     if (!el) {
@@ -1051,10 +1138,13 @@
     document.getElementById('nav-auth-area').style.display = 'none';
     document.getElementById('login-screen').classList.add('show');
     document.getElementById('login-form-area').style.display = 'flex';
+    document.getElementById('login-password-row').style.display = 'flex';
+    document.getElementById('login-magic-row').style.display = 'none';
     document.getElementById('login-sent').classList.remove('show');
-    const btn = document.querySelector('#login-form-area .btn-primary');
-    if (btn) { btn.textContent = 'Send Magic Link'; btn.disabled = false; }
+    document.getElementById('login-btn').textContent = 'Sign In';
+    document.getElementById('login-btn').disabled = false;
     document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
   }
 
   // Show logged-in nav
