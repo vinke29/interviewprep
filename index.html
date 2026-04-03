@@ -752,9 +752,10 @@
       .question-text { font-size: 1.05rem; order: 2; }
       .badge-row { order: 1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; flex-wrap: wrap; }
 
-      /* Swipe hint row replaces the standalone Next button */
-      .swipe-hint { display: flex !important; }
-      #btn-next { display: none !important; }
+      /* Swipe hint: visible on mobile, hidden while editing */
+      .swipe-hint { display: flex; }
+      #practice-card.is-editing .swipe-hint { display: none; }
+      #btn-next { display: none; }
     }
   </style>
 </head>
@@ -899,15 +900,22 @@
 
     <!-- READ STATE: card already answered -->
     <div id="read-section" style="display:none;">
-      <div class="field">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-          <span class="answer-label">Your Answer</span>
-          <button class="btn-secondary" style="padding:4px 12px;font-size:0.75rem;" onclick="startEditAnswer()">Edit</button>
-        </div>
-        <div id="answer-read" class="answered-box"></div>
+      <!-- Initially just the reveal-my-answer button -->
+      <div class="btn-row" id="btn-reveal-mine-row">
+        <button class="btn-secondary" style="width:100%;justify-content:center;" onclick="revealMyAnswer()">Reveal My Answer</button>
       </div>
-      <div class="btn-row">
-        <button class="btn-primary" id="btn-reveal-sample" onclick="revealSample()" style="display:none;">Reveal Sample Answer</button>
+      <!-- Shown after clicking Reveal My Answer -->
+      <div id="my-answer-reveal" style="display:none;">
+        <div class="field">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <span class="answer-label">Your Answer</span>
+            <button class="btn-secondary" style="padding:4px 12px;font-size:0.75rem;" onclick="startEditAnswer()">Edit</button>
+          </div>
+          <div id="answer-read" class="answered-box"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-primary" id="btn-reveal-sample" onclick="revealSample()" style="display:none;">Reveal Sample Answer</button>
+        </div>
       </div>
     </div>
 
@@ -923,7 +931,7 @@
       </div>
     </div>
 
-    <div class="swipe-hint" style="display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:-4px;">
+    <div class="swipe-hint" style="align-items:center;justify-content:space-between;gap:8px;margin-top:-4px;display:none;">
       <button class="btn-secondary" style="padding:8px 14px;font-size:0.8rem;" onclick="prevCard()">&#8592; Prev</button>
       <span style="font-size:0.72rem;color:var(--text-dim);">swipe or tap to navigate</span>
       <button class="btn-secondary" style="padding:8px 14px;font-size:0.8rem;" onclick="nextCard()">Next &#8594;</button>
@@ -1590,15 +1598,18 @@
     typeEl.className = 'type-badge type-' + (q.type || 'behavioral');
 
     document.getElementById('reveal-section').classList.remove('shown');
+    document.getElementById('practice-card').classList.remove('is-editing');
 
     // Switch between read-only and write states
     const hasAnswer = !!q.userAnswer;
-    const hasSample = !!q.sampleAnswer;
     if (hasAnswer) {
       document.getElementById('read-section').style.display = '';
       document.getElementById('write-section').style.display = 'none';
+      // Reset collapsed state — answer hidden until user taps "Reveal My Answer"
+      document.getElementById('btn-reveal-mine-row').style.display = '';
+      document.getElementById('my-answer-reveal').style.display = 'none';
       document.getElementById('answer-read').textContent = q.userAnswer;
-      document.getElementById('btn-reveal-sample').style.display = hasSample ? '' : 'none';
+      document.getElementById('btn-reveal-sample').style.display = 'none';
     } else {
       document.getElementById('read-section').style.display = 'none';
       document.getElementById('write-section').style.display = '';
@@ -1641,13 +1652,25 @@
     document.getElementById('progress-label').textContent = `${answered} / ${total} answered`;
     document.getElementById('progress-fill').style.width = (answered / total * 100) + '%';
 
-    // Switch to read state
+    // Switch to read state (collapsed — user taps to reveal)
+    document.getElementById('practice-card').classList.remove('is-editing');
     document.getElementById('write-section').style.display = 'none';
     document.getElementById('read-section').style.display = '';
+    document.getElementById('btn-reveal-mine-row').style.display = '';
+    document.getElementById('my-answer-reveal').style.display = 'none';
     document.getElementById('answer-read').textContent = myAnswer;
-    document.getElementById('btn-reveal-sample').style.display = q.sampleAnswer ? '' : 'none';
+    document.getElementById('btn-reveal-sample').style.display = 'none';
 
     showToast(isEdit ? 'Answer updated!' : 'Answer saved!');
+  }
+
+  function revealMyAnswer() {
+    const q = shuffled[currentIndex];
+    document.getElementById('btn-reveal-mine-row').style.display = 'none';
+    document.getElementById('my-answer-reveal').style.display = '';
+    if (q.sampleAnswer) {
+      document.getElementById('btn-reveal-sample').style.display = '';
+    }
   }
 
   function revealSample() {
@@ -1661,11 +1684,13 @@
     document.getElementById('write-section').style.display = '';
     document.getElementById('btn-cancel-edit').style.display = 'inline-block';
     document.getElementById('reveal-section').classList.remove('shown');
+    document.getElementById('practice-card').classList.add('is-editing');
     document.getElementById('my-answer').focus();
   }
 
   function cancelEditAnswer() {
     const q = shuffled[currentIndex];
+    document.getElementById('practice-card').classList.remove('is-editing');
     if (q.userAnswer) {
       document.getElementById('write-section').style.display = 'none';
       document.getElementById('read-section').style.display = '';
