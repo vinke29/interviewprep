@@ -717,6 +717,7 @@
 
     /* ── MOBILE ── */
     @media (max-width: 600px) {
+      /* Nav */
       .nav-layer { padding: 0 14px; }
       .nav-logo { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .nav-user-email { display: none; }
@@ -725,7 +726,16 @@
       #nav-company-bar { top: 44px; }
       #nav-tabs { top: 84px; }
       .nav-tab { padding: 0 10px; font-size: 0.78rem; }
-      .card { padding: 20px 16px; }
+
+      /* Practice card: stack badges above question instead of beside it */
+      .card { padding: 20px 16px; gap: 16px; }
+      .card-header { flex-direction: column; gap: 10px; }
+      .question-text { font-size: 1.05rem; order: 2; }
+      .badge-row { order: 1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; }
+
+      /* Swipe hint row replaces the standalone Next button */
+      .swipe-hint { display: flex !important; }
+      #btn-next { display: none !important; }
     }
   </style>
 </head>
@@ -875,7 +885,13 @@
 
     <div class="btn-row">
       <button class="btn-primary" id="btn-reveal" onclick="revealAnswer()">Reveal Answer</button>
-      <button class="btn-secondary" onclick="nextCard()">Next Question &#8594;</button>
+      <button class="btn-secondary" id="btn-next" onclick="nextCard()">Next Question &#8594;</button>
+    </div>
+
+    <div class="swipe-hint" style="display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:-4px;">
+      <button class="btn-secondary" style="padding:8px 14px;font-size:0.8rem;" onclick="prevCard()">&#8592; Prev</button>
+      <span style="font-size:0.72rem;color:var(--text-dim);">swipe or tap to navigate</span>
+      <button class="btn-secondary" style="padding:8px 14px;font-size:0.8rem;" onclick="nextCard()">Next &#8594;</button>
     </div>
 
     <div class="reveal-section" id="reveal-section">
@@ -1802,15 +1818,33 @@
   (function() {
     let touchStartX = 0;
     let touchStartY = 0;
-    document.getElementById('practice-card').addEventListener('touchstart', function(e) {
+    let touchStartTime = 0;
+    let swipeActive = false;
+
+    const card = document.getElementById('practice-card');
+
+    card.addEventListener('touchstart', function(e) {
+      // Don't track swipes that begin on interactive elements
+      const tag = e.target.tagName;
+      if (tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'INPUT') {
+        swipeActive = false;
+        return;
+      }
       touchStartX = e.changedTouches[0].clientX;
       touchStartY = e.changedTouches[0].clientY;
+      touchStartTime = Date.now();
+      swipeActive = true;
     }, { passive: true });
-    document.getElementById('practice-card').addEventListener('touchend', function(e) {
+
+    card.addEventListener('touchend', function(e) {
+      if (!swipeActive) return;
+      swipeActive = false;
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
-      // Only trigger if horizontal swipe is dominant and long enough
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      const dt = Date.now() - touchStartTime;
+      const speed = Math.abs(dx) / dt; // px/ms
+      // Trigger if: clearly horizontal, 50px+ travel OR fast flick
+      if (Math.abs(dx) > Math.abs(dy) * 1.8 && (Math.abs(dx) > 50 || speed > 0.3)) {
         if (dx < 0) nextCard();
         else prevCard();
       }
