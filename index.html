@@ -36,145 +36,193 @@
     nav {
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 0 24px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      height: 56px;
+      gap: 4px;
+      height: 52px;
       position: sticky;
       top: 0;
       z-index: 10;
-      flex-wrap: wrap;
     }
 
     .nav-logo {
-      font-weight: 700;
-      font-size: 1rem;
+      font-weight: 800;
+      font-size: 0.95rem;
       color: var(--accent);
-      margin-right: 8px;
       letter-spacing: -0.3px;
-      cursor: pointer;
+      margin-right: 4px;
     }
 
-    .nav-company {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 10px;
-      cursor: pointer;
-      margin-right: 8px;
+    .nav-sep {
+      color: var(--border);
+      font-size: 1.1rem;
+      font-weight: 300;
+      margin: 0 6px;
+      user-select: none;
     }
 
-    .nav-company:hover { border-color: var(--accent); color: var(--text); }
+    .nav-company-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+      margin: 0 8px;
+    }
 
     .nav-btn {
       background: none;
       border: none;
       color: var(--text-dim);
       cursor: pointer;
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-size: 0.875rem;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
       font-weight: 500;
       transition: all 0.15s;
     }
 
-    .nav-btn:hover { background: var(--surface2); color: var(--text); }
-    .nav-btn.active { background: var(--surface2); color: var(--accent); }
-
-    .nav-count {
-      margin-left: auto;
-      font-size: 0.8rem;
-      color: var(--text-dim);
+    .nav-btn:hover { color: var(--text); }
+    .nav-btn.active { color: var(--text); font-weight: 600; }
+    .nav-btn.active::after {
+      content: '';
+      display: block;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+      margin-top: 2px;
     }
 
+    .nav-spacer { flex: 1; }
+
+    .nav-switch-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .nav-switch-btn:hover { border-color: var(--text-dim); color: var(--text); }
+
     /* VIEWS */
-    .view { display: none; flex: 1; padding: 32px 24px; max-width: 760px; margin: 0 auto; width: 100%; }
+    .view { display: none; flex: 1; padding: 40px 24px 60px; max-width: 680px; margin: 0 auto; width: 100%; }
     .view.active { display: flex; flex-direction: column; gap: 20px; }
 
     /* ── HOME VIEW ── */
     .home-hero {
       text-align: center;
-      padding: 20px 0 8px;
+      padding: 32px 0 4px;
     }
 
     .home-hero h1 {
-      font-size: 1.8rem;
+      font-size: 2rem;
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
     }
 
     .home-hero p {
       color: var(--text-dim);
-      font-size: 0.95rem;
+      font-size: 0.92rem;
+      line-height: 1.5;
     }
 
     .home-form {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 16px;
       padding: 28px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 20px;
     }
 
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
 
     .chip {
-      background: var(--surface2);
+      background: transparent;
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 5px 14px;
-      font-size: 0.82rem;
+      padding: 4px 13px;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.15s;
       color: var(--text-dim);
+      font-family: inherit;
     }
 
-    .chip:hover, .chip.selected { background: rgba(255,153,0,0.12); border-color: var(--accent); color: var(--accent); }
+    .chip:hover { border-color: var(--text-dim); color: var(--text); }
+    .chip.selected { background: rgba(255,153,0,0.1); border-color: var(--accent); color: var(--accent); }
 
     .saved-sets {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .saved-set-item {
-      background: var(--surface2);
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 16px;
+      border-radius: 10px;
+      padding: 14px 16px;
       display: flex;
       align-items: center;
       gap: 12px;
       cursor: pointer;
-      transition: border-color 0.15s;
+      transition: all 0.15s;
     }
 
-    .saved-set-item:hover { border-color: var(--accent); }
+    .saved-set-item:hover { border-color: rgba(255,153,0,0.4); background: rgba(255,153,0,0.03); }
 
-    .saved-set-info { flex: 1; }
-    .saved-set-name { font-weight: 600; font-size: 0.95rem; }
-    .saved-set-meta { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+    .saved-set-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255,153,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .saved-set-info { flex: 1; min-width: 0; }
+    .saved-set-name { font-weight: 600; font-size: 0.92rem; }
+    .saved-set-meta { font-size: 0.75rem; color: var(--text-dim); margin-top: 2px; }
+
+    .saved-set-arrow {
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
 
     .saved-set-del {
       background: none;
       border: none;
-      color: var(--text-dim);
+      color: var(--border);
       cursor: pointer;
-      padding: 4px 8px;
+      padding: 4px 6px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
+      line-height: 1;
+      transition: all 0.15s;
     }
 
-    .saved-set-del:hover { color: var(--red); background: rgba(255,85,85,0.1); }
+    .saved-set-del:hover { color: var(--red); }
 
     /* Loading overlay */
     .loading-overlay {
@@ -211,25 +259,32 @@
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
+      border-radius: 16px;
+      padding: 32px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .card-header {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 12px;
+      gap: 16px;
     }
 
     .question-text {
-      font-size: 1.15rem;
-      font-weight: 600;
+      font-size: 1.2rem;
+      font-weight: 700;
       line-height: 1.5;
       flex: 1;
+      letter-spacing: -0.2px;
     }
 
     .badge-row {
@@ -241,15 +296,16 @@
     }
 
     .lp-badge {
-      background: rgba(255,153,0,0.12);
+      background: rgba(255,153,0,0.1);
       color: var(--accent);
-      border: 1px solid rgba(255,153,0,0.25);
+      border: 1px solid rgba(255,153,0,0.2);
       border-radius: 6px;
       padding: 3px 10px;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 600;
       white-space: nowrap;
       text-align: right;
+      letter-spacing: 0.02em;
     }
 
     .type-badge {
@@ -324,7 +380,7 @@
 
     .btn-row {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
@@ -334,17 +390,18 @@
       font-weight: 600;
       border: none;
       border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 0.875rem;
+      padding: 9px 18px;
+      font-size: 0.85rem;
       transition: all 0.15s;
+      letter-spacing: 0.01em;
     }
 
     .btn-primary { background: var(--accent); color: #000; }
-    .btn-primary:hover { background: var(--accent-dim); }
-    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-    .btn-secondary:hover { background: var(--border); }
-    .btn-danger { background: rgba(255,85,85,0.12); color: var(--red); border: 1px solid rgba(255,85,85,0.2); }
-    .btn-danger:hover { background: rgba(255,85,85,0.22); }
+    .btn-primary:hover { background: var(--accent-dim); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,153,0,0.25); }
+    .btn-secondary { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+    .btn-secondary:hover { color: var(--text); border-color: var(--text-dim); }
+    .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(255,85,85,0.2); }
+    .btn-danger:hover { background: rgba(255,85,85,0.08); border-color: var(--red); }
 
     .empty-state {
       text-align: center;
@@ -513,13 +570,15 @@
 
 <!-- NAV: set mode (inside a company set) -->
 <nav id="nav-set-mode" style="display:none;">
-  <span class="nav-logo" style="cursor:default;">&#9654; Interview Prep</span>
-  <span class="nav-company" id="nav-company-badge"></span>
+  <span class="nav-logo">&#9654; Interview Prep</span>
+  <span class="nav-sep">/</span>
+  <span class="nav-company-name" id="nav-company-badge"></span>
+  <div class="nav-divider"></div>
   <button class="nav-btn active" onclick="showView('practice')" id="nav-practice">Practice</button>
   <button class="nav-btn" onclick="showView('all')" id="nav-all">All Questions</button>
   <button class="nav-btn" onclick="showView('add')" id="nav-add">+ Add</button>
-  <button class="nav-btn" onclick="switchCompany()" id="nav-switch" style="margin-left:auto;">Switch Company</button>
-  <span class="nav-count" id="nav-count"></span>
+  <div class="nav-spacer"></div>
+  <button class="nav-switch-btn" onclick="switchCompany()">Switch Company</button>
 </nav>
 
 <!-- LOADING OVERLAY -->
@@ -564,9 +623,7 @@
   </div>
 
   <div id="saved-sets-section" style="display:none;">
-    <div class="view-header" style="margin-bottom:10px;">
-      <div class="answer-label">Saved Sets</div>
-    </div>
+    <div style="font-size:0.75rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;padding-left:2px;">Your saved sets</div>
     <div class="saved-sets" id="saved-sets-list"></div>
   </div>
 </div>
@@ -768,11 +825,13 @@
       const item = document.createElement('div');
       item.className = 'saved-set-item';
       item.innerHTML = `
+        <div class="saved-set-icon">&#127970;</div>
         <div class="saved-set-info" onclick="loadSet('${k}')">
-          <div class="saved-set-name">${escHtml(s.company)}${s.role ? ' <span style="color:var(--text-dim);font-weight:400;">· ' + escHtml(s.role) + '</span>' : ''}</div>
-          <div class="saved-set-meta">${s.questions.length} questions · ${answered} answered · ${s.generatedAt || ''}</div>
+          <div class="saved-set-name">${escHtml(s.company)}${s.role ? '<span style="color:var(--text-dim);font-weight:400;"> · ' + escHtml(s.role) + '</span>' : ''}</div>
+          <div class="saved-set-meta">${s.questions.length} questions &middot; ${answered} answered &middot; ${s.generatedAt || ''}</div>
         </div>
-        <button class="saved-set-del" onclick="deleteSet(event,'${k}')">&#x2715;</button>
+        <span class="saved-set-arrow" onclick="loadSet('${k}')">&#8594;</span>
+        <button class="saved-set-del" onclick="deleteSet(event,'${k}')" title="Delete">&#x2715;</button>
       `;
       list.appendChild(item);
     });
