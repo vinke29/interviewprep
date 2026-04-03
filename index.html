@@ -506,12 +506,19 @@
 </head>
 <body>
 
-<nav id="main-nav">
-  <span class="nav-logo" onclick="showView('home')">&#9654; Interview Prep</span>
-  <span class="nav-company" id="nav-company-badge" onclick="showView('home')" style="display:none;"></span>
-  <button class="nav-btn active" onclick="showView('practice')" id="nav-practice" style="display:none;">Practice</button>
-  <button class="nav-btn" onclick="showView('add')" id="nav-add" style="display:none;">+ Add</button>
-  <button class="nav-btn" onclick="showView('all')" id="nav-all" style="display:none;">All Questions</button>
+<!-- NAV: home mode (no active set) -->
+<nav id="nav-home-mode">
+  <span class="nav-logo">&#9654; Interview Prep</span>
+</nav>
+
+<!-- NAV: set mode (inside a company set) -->
+<nav id="nav-set-mode" style="display:none;">
+  <span class="nav-logo" style="cursor:default;">&#9654; Interview Prep</span>
+  <span class="nav-company" id="nav-company-badge"></span>
+  <button class="nav-btn active" onclick="showView('practice')" id="nav-practice">Practice</button>
+  <button class="nav-btn" onclick="showView('all')" id="nav-all">All Questions</button>
+  <button class="nav-btn" onclick="showView('add')" id="nav-add">+ Add</button>
+  <button class="nav-btn" onclick="switchCompany()" id="nav-switch" style="margin-left:auto;">Switch Company</button>
   <span class="nav-count" id="nav-count"></span>
 </nav>
 
@@ -713,32 +720,41 @@
   // ── NAVIGATION ───────────────────────────────────────────
   function showView(name) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('view-' + name).classList.add('active');
-    const nb = document.getElementById('nav-' + name);
-    if (nb) nb.classList.add('active');
+
+    const inSet = !!activeSet;
+    document.getElementById('nav-home-mode').style.display = inSet ? 'none' : '';
+    document.getElementById('nav-set-mode').style.display = inSet ? '' : 'none';
+
+    if (inSet) {
+      // update active nav button
+      ['practice','all','add'].forEach(v => {
+        document.getElementById('nav-' + v).classList.toggle('active', v === name);
+      });
+      document.getElementById('nav-company-badge').textContent =
+        activeSet.company + (activeSet.role ? ' · ' + activeSet.role : '');
+      document.getElementById('nav-count').textContent =
+        activeSet.questions.length + ' questions';
+    }
 
     if (name === 'home') renderHome();
     if (name === 'practice') renderPractice();
     if (name === 'all') renderAll();
+  }
 
-    // show/hide nav buttons depending on whether a set is active
-    const hasPractice = !!activeSet;
-    ['practice','add','all'].forEach(v => {
-      const el = document.getElementById('nav-' + v);
-      if (el) el.style.display = hasPractice ? '' : 'none';
-    });
-    const badge = document.getElementById('nav-company-badge');
-    if (hasPractice) {
-      badge.style.display = '';
-      badge.textContent = activeSet.company + (activeSet.role ? ' · ' + activeSet.role : '');
-    } else {
-      badge.style.display = 'none';
-    }
+  function switchCompany() {
+    activeSet = null;
+    activeSetKey = '';
+    showView('home');
   }
 
   // ── HOME ─────────────────────────────────────────────────
   function renderHome() {
+    // Clear picker inputs so it feels fresh
+    document.getElementById('input-company').value = '';
+    document.getElementById('input-role').value = '';
+    document.querySelectorAll('#company-chips .chip').forEach(c => c.classList.remove('selected'));
+
     loadSets();
     const keys = Object.keys(allSets);
     const sec = document.getElementById('saved-sets-section');
