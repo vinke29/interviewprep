@@ -714,6 +714,19 @@
       font-size: 0.78rem;
       color: var(--text-dim);
     }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .nav-layer { padding: 0 14px; }
+      .nav-logo { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .nav-user-email { display: none; }
+      .nav-auth-area { flex-shrink: 0; gap: 8px; }
+      #nav-app { height: 44px; }
+      #nav-company-bar { top: 44px; }
+      #nav-tabs { top: 84px; }
+      .nav-tab { padding: 0 10px; font-size: 0.78rem; }
+      .card { padding: 20px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -1582,6 +1595,11 @@
     showCard();
   }
 
+  function prevCard() {
+    currentIndex = currentIndex > 0 ? currentIndex - 1 : shuffled.length - 1;
+    showCard();
+  }
+
   // ── ADD QUESTION ─────────────────────────────────────────
   function saveNewQuestion() {
     const question = document.getElementById('add-question').value.trim();
@@ -1779,6 +1797,25 @@
       }
     }).catch(() => {});
   }
+
+  // ── SWIPE NAVIGATION ─────────────────────────────────────
+  (function() {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    document.getElementById('practice-card').addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+    }, { passive: true });
+    document.getElementById('practice-card').addEventListener('touchend', function(e) {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      // Only trigger if horizontal swipe is dominant and long enough
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+        if (dx < 0) nextCard();
+        else prevCard();
+      }
+    }, { passive: true });
+  })();
 
   init();
 </script>
