@@ -753,9 +753,9 @@
       .badge-row { order: 1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; flex-wrap: wrap; }
 
       /* Swipe hint: visible on mobile, hidden while editing */
-      .swipe-hint { display: flex; }
-      #practice-card.is-editing .swipe-hint { display: none; }
-      #btn-next { display: none; }
+      .swipe-hint { display: flex !important; }
+      #practice-card.is-editing .swipe-hint { display: none !important; }
+      #btn-next { display: none !important; }
     }
   </style>
 </head>
@@ -1916,7 +1916,7 @@
 
     card.addEventListener('touchstart', function(e) {
       const tag = e.target.tagName;
-      if (tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'INPUT') return;
+      if (tag === 'TEXTAREA' || tag === 'INPUT') return;
       if (isAnimating) return;
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
