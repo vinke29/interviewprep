@@ -729,7 +729,7 @@
     <div class="login-fields" id="login-form-area">
       <input class="login-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email"
         onkeydown="if(event.key==='Enter') sendMagicLink()" />
-      <button class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="sendMagicLink()">Send Magic Link</button>
+      <button id="login-btn" class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="sendMagicLink()">Send Magic Link</button>
     </div>
     <div class="login-sent" id="login-sent">
       <div class="login-sent-icon">&#9993;&#65039;</div>
@@ -952,10 +952,11 @@
   // Send magic link email
   async function sendMagicLink() {
     const email = document.getElementById('login-email').value.trim();
-    if (!email) { alert('Please enter your email.'); return; }
-    const btn = document.querySelector('#login-form-area .btn-primary');
+    if (!email) { showLoginError('Please enter your email.'); return; }
+    const btn = document.getElementById('login-btn');
     btn.textContent = 'Sending...';
     btn.disabled = true;
+    clearLoginError();
     try {
       const res = await supabaseAuth('magiclink', {
         email,
@@ -968,15 +969,36 @@
           'We sent a link to ' + email + '. Click it to sign in — it expires in 1 hour.';
       } else {
         const err = await res.json();
-        alert('Error: ' + (err.msg || err.message || 'Could not send link.'));
+        const msg = err.msg || err.message || '';
+        if (msg.toLowerCase().includes('rate limit')) {
+          showLoginError('Too many requests — please wait a few minutes and try again.');
+        } else {
+          showLoginError(msg || 'Could not send link. Please try again.');
+        }
         btn.textContent = 'Send Magic Link';
         btn.disabled = false;
       }
     } catch(e) {
-      alert('Network error. Please try again.');
+      showLoginError('Network error. Please try again.');
       btn.textContent = 'Send Magic Link';
       btn.disabled = false;
     }
+  }
+
+  function showLoginError(msg) {
+    let el = document.getElementById('login-error');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'login-error';
+      el.style.cssText = 'font-size:0.83rem;color:var(--red);line-height:1.4;';
+      document.getElementById('login-form-area').appendChild(el);
+    }
+    el.textContent = msg;
+  }
+
+  function clearLoginError() {
+    const el = document.getElementById('login-error');
+    if (el) el.textContent = '';
   }
 
   // Exchange token from URL hash for a session
