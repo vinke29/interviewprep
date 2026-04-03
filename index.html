@@ -6,6 +6,7 @@
   <title>Interview Prep</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { overflow-x: hidden; }
 
     :root {
       --bg: #0f1117;
@@ -717,6 +718,18 @@
       color: var(--text-dim);
     }
 
+    .answered-box {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text);
+      white-space: pre-wrap;
+      min-height: 60px;
+    }
+
     /* ── MOBILE ── */
     @media (max-width: 600px) {
       /* Prevent any element from overflowing the viewport width */
@@ -884,14 +897,30 @@
       <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
     </div>
 
-    <div class="field">
-      <span class="answer-label">Your Answer</span>
-      <textarea id="my-answer" placeholder="Write your answer here..."></textarea>
+    <!-- READ STATE: card already answered -->
+    <div id="read-section" style="display:none;">
+      <div class="field">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <span class="answer-label">Your Answer</span>
+          <button class="btn-secondary" style="padding:4px 12px;font-size:0.75rem;" onclick="startEditAnswer()">Edit</button>
+        </div>
+        <div id="answer-read" class="answered-box"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-reveal-sample" onclick="revealSample()" style="display:none;">Reveal Sample Answer</button>
+      </div>
     </div>
 
-    <div class="btn-row">
-      <button class="btn-primary" id="btn-reveal" onclick="revealAnswer()">Reveal Answer</button>
-      <button class="btn-secondary" id="btn-next" onclick="nextCard()">Next Question &#8594;</button>
+    <!-- WRITE STATE: new answer or editing -->
+    <div id="write-section">
+      <div class="field">
+        <span class="answer-label">Your Answer</span>
+        <textarea id="my-answer" placeholder="Write your answer here..."></textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-save" onclick="saveAnswer()">Save Answer</button>
+        <button class="btn-secondary" id="btn-cancel-edit" onclick="cancelEditAnswer()" style="display:none;">Cancel</button>
+      </div>
     </div>
 
     <div class="swipe-hint" style="display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:-4px;">
@@ -1560,13 +1589,22 @@
     typeEl.textContent = q.type || 'behavioral';
     typeEl.className = 'type-badge type-' + (q.type || 'behavioral');
 
-    document.getElementById('my-answer').value = q.userAnswer || '';
     document.getElementById('reveal-section').classList.remove('shown');
 
+    // Switch between read-only and write states
+    const hasAnswer = !!q.userAnswer;
     const hasSample = !!q.sampleAnswer;
-    const btnReveal = document.getElementById('btn-reveal');
-    btnReveal.textContent = hasSample ? 'Reveal Sample Answer' : 'Save Answer';
-    btnReveal.style.display = '';
+    if (hasAnswer) {
+      document.getElementById('read-section').style.display = '';
+      document.getElementById('write-section').style.display = 'none';
+      document.getElementById('answer-read').textContent = q.userAnswer;
+      document.getElementById('btn-reveal-sample').style.display = hasSample ? '' : 'none';
+    } else {
+      document.getElementById('read-section').style.display = 'none';
+      document.getElementById('write-section').style.display = '';
+      document.getElementById('my-answer').value = '';
+      document.getElementById('btn-cancel-edit').style.display = 'none';
+    }
 
     // Progress
     const answered = activeSet.questions.filter(x => x.userAnswer).length;
@@ -1585,31 +1623,54 @@
     revealLabel.style.color = isCase ? '#a78bfa' : '#3ecf8e';
   }
 
-  function revealAnswer() {
+  function saveAnswer() {
     const q = shuffled[currentIndex];
     const myAnswer = document.getElementById('my-answer').value.trim();
+    if (!myAnswer) return;
 
-    // Save user answer if typed
-    if (myAnswer && myAnswer !== q.userAnswer) {
-      q.userAnswer = myAnswer;
-      loadSets();
-      const idx = allSets[activeSetKey].questions.findIndex(x => x.id === q.id);
-      if (idx !== -1) allSets[activeSetKey].questions[idx].userAnswer = myAnswer;
-      saveSets(activeSetKey);
+    const isEdit = !!q.userAnswer; // was this an edit of an existing answer?
+    q.userAnswer = myAnswer;
+    loadSets();
+    const idx = allSets[activeSetKey].questions.findIndex(x => x.id === q.id);
+    if (idx !== -1) allSets[activeSetKey].questions[idx].userAnswer = myAnswer;
+    saveSets(activeSetKey);
 
-      // Update progress
-      const answered = activeSet.questions.filter(x => x.userAnswer).length;
-      const total = activeSet.questions.length;
-      document.getElementById('progress-label').textContent = `${answered} / ${total} answered`;
-      document.getElementById('progress-fill').style.width = (answered / total * 100) + '%';
+    // Update progress
+    const answered = activeSet.questions.filter(x => x.userAnswer).length;
+    const total = activeSet.questions.length;
+    document.getElementById('progress-label').textContent = `${answered} / ${total} answered`;
+    document.getElementById('progress-fill').style.width = (answered / total * 100) + '%';
 
-      if (q.sampleAnswer) document.getElementById('btn-reveal').textContent = 'Reveal Sample Answer';
-      showToast('Answer saved!');
-    }
+    // Switch to read state
+    document.getElementById('write-section').style.display = 'none';
+    document.getElementById('read-section').style.display = '';
+    document.getElementById('answer-read').textContent = myAnswer;
+    document.getElementById('btn-reveal-sample').style.display = q.sampleAnswer ? '' : 'none';
 
-    // Only open the reveal section if there's actually a sample answer
-    if (q.sampleAnswer) {
-      document.getElementById('reveal-section').classList.add('shown');
+    showToast(isEdit ? 'Answer updated!' : 'Answer saved!');
+  }
+
+  function revealSample() {
+    document.getElementById('reveal-section').classList.add('shown');
+  }
+
+  function startEditAnswer() {
+    const q = shuffled[currentIndex];
+    document.getElementById('my-answer').value = q.userAnswer || '';
+    document.getElementById('read-section').style.display = 'none';
+    document.getElementById('write-section').style.display = '';
+    document.getElementById('btn-cancel-edit').style.display = 'inline-block';
+    document.getElementById('reveal-section').classList.remove('shown');
+    document.getElementById('my-answer').focus();
+  }
+
+  function cancelEditAnswer() {
+    const q = shuffled[currentIndex];
+    if (q.userAnswer) {
+      document.getElementById('write-section').style.display = 'none';
+      document.getElementById('read-section').style.display = '';
+    } else {
+      document.getElementById('btn-cancel-edit').style.display = 'none';
     }
   }
 
