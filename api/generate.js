@@ -17,30 +17,28 @@ export default async function handler(req, res) {
 
   const prompt = `You are an expert interview coach. Generate exactly 50 interview questions for ${company}${roleStr}.
 
-Return ONLY valid JSON with NO markdown, NO code fences, NO extra text — just the raw JSON object.
+Return ONLY valid JSON — no markdown, no code fences, no extra text.
 
-Schema:
 {
   "company": "${company}",
   "role": "${role || ''}",
-  "frameworks": ["Framework1", "Framework2", ...],
+  "frameworks": ["Framework1", "Framework2"],
   "questions": [
     {
       "question": "...",
-      "category": "exact framework name from frameworks array",
+      "category": "framework name",
       "type": "behavioral|case|situational|technical",
-      "sampleAnswer": "150-300 word strong sample answer using appropriate structure (STAR for behavioral, structured framework for case)"
+      "sampleAnswer": "2-4 sentence strong answer. STAR format for behavioral. Key framework/approach for case questions."
     }
   ]
 }
 
 Rules:
-- frameworks: use the REAL evaluation frameworks ${company} uses (e.g. Amazon → their 16 Leadership Principles; Google → Googleyness & Being Comfortable with Ambiguity / Leadership / Role-Related Knowledge / General Cognitive Ability; McKinsey/BCG/Bain → Case Interview / Personal Experience Interview / Fit; Meta → Focus on Impact / Move Fast / Be Open / Build Social Value / Live in the Future; Microsoft → Growth Mindset / Customer Obsessed / Diverse & Inclusive / One Microsoft / Making a Difference; for other companies invent 4-6 logical competency buckets)
-- Spread questions roughly evenly across all frameworks
-- For case questions (consulting firms, or "case" type), sampleAnswer should outline the case approach/framework to use, not a STAR story
-- For behavioral, use STAR structure in sampleAnswer
-- Generate exactly 50 questions
-- Make questions specific to ${company}'s culture and interview style`;
+- frameworks: use ${company}'s REAL evaluation criteria (Amazon→16 Leadership Principles; Google→Googleyness/Leadership/Role Knowledge/Cognitive Ability; Meta→Impact/Move Fast/Be Open/Build Social Value; Microsoft→Growth Mindset/Customer Obsessed/Diverse & Inclusive/One Microsoft; McKinsey/BCG/Bain→Case Interview/Personal Experience Interview/Fit; other companies→4-6 logical competency buckets)
+- Spread questions evenly across frameworks
+- sampleAnswer: keep to 2-4 sentences max — punchy and specific, not verbose
+- Case questions: sampleAnswer = the framework/approach to use (e.g. "Use a market sizing framework: clarify scope, segment the market, estimate each segment, sum up")
+- Generate exactly 50 questions specific to ${company}'s culture`;
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -53,7 +51,7 @@ Rules:
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
-        max_tokens: 16000,
+        max_tokens: 8000,
       }),
     });
 
