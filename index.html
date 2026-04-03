@@ -724,7 +724,17 @@
     <div class="login-logo">&#9654; Interview Prep</div>
     <div class="login-heading">
       <div class="login-title" id="login-title">Sign in</div>
-      <div class="login-subtitle" id="login-subtitle">Sign in with your password or get a magic link sent to your email.</div>
+      <!-- mode toggle -->
+      <div style="display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-top:4px;">
+        <button id="tab-signin" onclick="setLoginMode('signin')"
+          style="flex:1;border:none;border-radius:6px;padding:7px 0;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;background:var(--accent);color:#000;">
+          Sign In
+        </button>
+        <button id="tab-signup" onclick="setLoginMode('signup')"
+          style="flex:1;border:none;border-radius:6px;padding:7px 0;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;background:transparent;color:var(--text-dim);">
+          Create Account
+        </button>
+      </div>
     </div>
     <div class="login-fields" id="login-form-area">
       <input class="login-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email"
@@ -999,6 +1009,26 @@
     }
   }
 
+  let loginMode = 'signin'; // 'signin' | 'signup'
+
+  function setLoginMode(mode) {
+    loginMode = mode;
+    clearLoginError();
+    const isSignup = mode === 'signup';
+    document.getElementById('login-title').textContent = isSignup ? 'Create Account' : 'Sign in';
+    document.getElementById('login-btn').textContent = isSignup ? 'Create Account' : 'Sign In';
+    document.getElementById('login-password').placeholder = isSignup ? 'Choose a password' : 'Password';
+    document.getElementById('login-password').autocomplete = isSignup ? 'new-password' : 'current-password';
+    // Tab styles
+    document.getElementById('tab-signin').style.background = isSignup ? 'transparent' : 'var(--accent)';
+    document.getElementById('tab-signin').style.color = isSignup ? 'var(--text-dim)' : '#000';
+    document.getElementById('tab-signup').style.background = isSignup ? 'var(--accent)' : 'transparent';
+    document.getElementById('tab-signup').style.color = isSignup ? '#000' : 'var(--text-dim)';
+    // Hide magic link in signup mode
+    document.getElementById('login-password-row').style.display = 'flex';
+    document.getElementById('login-magic-row').style.display = 'none';
+  }
+
   function switchToMagicLink() {
     document.getElementById('login-password-row').style.display = 'none';
     document.getElementById('login-magic-row').style.display = 'flex';
@@ -1017,27 +1047,22 @@
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
     if (!email) { showLoginError('Please enter your email.'); return; }
-    if (!password) { showLoginError('Please enter your password.'); return; }
+    if (!password) { showLoginError('Please enter a password.'); return; }
     const btn = document.getElementById('login-btn');
-    btn.textContent = 'Signing in...';
+    const isSignup = loginMode === 'signup';
+    btn.textContent = isSignup ? 'Creating account...' : 'Signing in...';
     btn.disabled = true;
     clearLoginError();
     try {
-      // Try sign in first
-      let res = await supabaseAuth('token?grant_type=password', { email, password });
-      if (res.status === 400) {
-        // Account may not exist — try sign up
-        const signupRes = await supabaseAuth('signup', { email, password });
-        if (signupRes.ok) {
-          // Try sign in again after signup
+      let res;
+      if (isSignup) {
+        res = await supabaseAuth('signup', { email, password });
+        if (res.ok) {
+          // Auto sign in after signup
           res = await supabaseAuth('token?grant_type=password', { email, password });
-        } else {
-          const err = await signupRes.json();
-          showLoginError(err.msg || err.message || 'Incorrect email or password.');
-          btn.textContent = 'Sign In';
-          btn.disabled = false;
-          return;
         }
+      } else {
+        res = await supabaseAuth('token?grant_type=password', { email, password });
       }
       if (res.ok) {
         const data = await res.json();
@@ -1061,8 +1086,9 @@
         }).catch(() => {});
       } else {
         const err = await res.json();
-        showLoginError(err.msg || err.error_description || err.message || 'Incorrect email or password.');
-        btn.textContent = 'Sign In';
+        const msg = err.msg || err.error_description || err.message || '';
+        showLoginError(msg || (isSignup ? 'Could not create account.' : 'Incorrect email or password.'));
+        btn.textContent = isSignup ? 'Create Account' : 'Sign In';
         btn.disabled = false;
       }
     } catch(e) {
