@@ -421,7 +421,7 @@
       flex-direction: column;
       gap: 20px;
       will-change: transform;
-      touch-action: pan-y;
+      touch-action: none;
       overflow: hidden;
     }
 
@@ -753,9 +753,6 @@
       .question-text { font-size: 1.05rem; order: 2; }
       .badge-row { order: 1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; flex-wrap: wrap; }
 
-      /* Swipe hint: visible on mobile, hidden while editing */
-      .swipe-hint { display: flex !important; }
-      #practice-card.is-editing .swipe-hint { display: none !important; }
       #btn-next { display: none !important; }
     }
   </style>
@@ -1947,7 +1944,6 @@
 
       if (isDragging) {
         e.preventDefault(); // stop page scroll while we handle the drag
-        card.style.touchAction = 'none'; // belt-and-suspenders for iOS
         const rotate = dx * 0.04;
         const opacity = 1 - Math.min(Math.abs(dx) / 320, 0.35);
         card.style.transition = 'none';
@@ -1959,7 +1955,6 @@
     card.addEventListener('touchend', function(e) {
       if (!isDragging) return;
       isDragging = false;
-      card.style.touchAction = ''; // restore normal touch handling
       const dx = e.changedTouches[0].clientX - startX;
       const dt = Date.now();
 
@@ -2004,7 +1999,6 @@
     card.addEventListener('touchcancel', function() {
       isDragging = false;
       isAnimating = false;
-      card.style.touchAction = '';
       card.style.transition = 'transform 0.3s ease, opacity 0.2s ease';
       card.style.transform = 'translateX(0) rotate(0)';
       card.style.opacity = '1';
