@@ -811,8 +811,8 @@
     document.getElementById('view-' + name).classList.add('active');
 
     const inSet = !!activeSet;
-    document.getElementById('nav-company-bar').style.display = inSet ? '' : 'none';
-    document.getElementById('nav-tabs').style.display = inSet ? '' : 'none';
+    document.getElementById('nav-company-bar').style.display = inSet ? 'flex' : 'none';
+    document.getElementById('nav-tabs').style.display = inSet ? 'flex' : 'none';
     document.body.classList.toggle('in-set', inSet);
 
     if (inSet) {
