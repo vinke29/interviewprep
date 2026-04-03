@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amazon Interview Practice</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3250;
+      --accent: #ff9900;
+      --accent-dim: #cc7a00;
+      --text: #e8eaf0;
+      --text-dim: #8b90a8;
+      --green: #3ecf8e;
+      --red: #f55;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 56px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+      margin-right: 16px;
+      letter-spacing: -0.3px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .nav-btn:hover { background: var(--surface2); color: var(--text); }
+    .nav-btn.active { background: var(--surface2); color: var(--accent); }
+
+    .nav-count {
+      margin-left: auto;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+
+    /* VIEWS */
+    .view { display: none; flex: 1; padding: 32px 24px; max-width: 760px; margin: 0 auto; width: 100%; }
+    .view.active { display: flex; flex-direction: column; gap: 20px; }
+
+    /* PRACTICE VIEW */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .lp-badge {
+      background: rgba(255,153,0,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(255,153,0,0.25);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .answer-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      padding: 12px 14px;
+      resize: vertical;
+      min-height: 130px;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+
+    textarea:focus { outline: none; border-color: var(--accent); }
+
+    .reveal-section {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .reveal-section.shown { display: flex; }
+
+    .model-answer {
+      background: rgba(62,207,142,0.07);
+      border: 1px solid rgba(62,207,142,0.2);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      color: #c5f5e0;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.875rem;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover { background: var(--accent-dim); }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover { background: var(--border); }
+
+    .btn-danger {
+      background: rgba(255,85,85,0.12);
+      color: var(--red);
+      border: 1px solid rgba(255,85,85,0.2);
+    }
+
+    .btn-danger:hover { background: rgba(255,85,85,0.22); }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-dim);
+      padding: 60px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .empty-state .big { font-size: 2.5rem; }
+    .empty-state p { font-size: 0.95rem; }
+
+    /* ADD VIEW */
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .form-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    input[type="text"], select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      padding: 10px 12px;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+
+    input[type="text"]:focus, select:focus { outline: none; border-color: var(--accent); }
+
+    select option { background: var(--surface2); }
+
+    /* ALL QUESTIONS VIEW */
+    .q-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .q-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .q-item-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .q-item-header:hover { background: var(--surface2); }
+
+    .q-item-question {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .q-item-chevron {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+
+    .q-item.open .q-item-chevron { transform: rotate(180deg); }
+
+    .q-item-body {
+      display: none;
+      padding: 0 18px 16px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .q-item.open .q-item-body { display: flex; }
+
+    .q-item-answer {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: var(--text-dim);
+      white-space: pre-wrap;
+      background: var(--surface2);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+
+    .q-item-edit-area {
+      min-height: 130px;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+    .view-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .view-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+    }
+
+    .success-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--green);
+      color: #000;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      transition: transform 0.25s ease;
+      z-index: 100;
+    }
+
+    .success-toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">&#9654; Amazon Prep</span>
+  <button class="nav-btn active" onclick="showView('practice')" id="nav-practice">Practice</button>
+  <button class="nav-btn" onclick="showView('add')" id="nav-add">+ Add Question</button>
+  <button class="nav-btn" onclick="showView('all')" id="nav-all">All Questions</button>
+  <span class="nav-count" id="nav-count"></span>
+</nav>
+
+<!-- PRACTICE VIEW -->
+<div class="view active" id="view-practice">
+  <div id="practice-empty" class="empty-state" style="display:none;">
+    <span class="big">&#128218;</span>
+    <p>No questions yet. Add your first one!</p>
+    <button class="btn-primary" onclick="showView('add')">Add Question</button>
+  </div>
+
+  <div id="practice-card" class="card">
+    <div class="card-header">
+      <div class="question-text" id="card-question"></div>
+      <span class="lp-badge" id="card-lp"></span>
+    </div>
+
+    <div class="field">
+      <span class="answer-label">Your Answer</span>
+      <textarea id="my-answer" placeholder="Write your answer here using the STAR method (Situation, Task, Action, Result)..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="btn-reveal" onclick="revealAnswer()">Reveal Answer</button>
+      <button class="btn-secondary" onclick="nextCard()">Next Question &#8594;</button>
+    </div>
+
+    <div class="reveal-section" id="reveal-section">
+      <span class="answer-label" style="color: #3ecf8e;">Model Answer</span>
+      <div class="model-answer" id="model-answer-text"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD VIEW -->
+<div class="view" id="view-add">
+  <div class="form-card">
+    <div class="form-title">Add a New Question</div>
+
+    <div class="field">
+      <label for="input-question">Question</label>
+      <input type="text" id="input-question" placeholder="e.g. Tell me about a time you had to deliver under a tight deadline." />
+    </div>
+
+    <div class="field">
+      <label for="input-lp">Leadership Principle</label>
+      <select id="input-lp">
+        <option value="">— Select a principle —</option>
+        <option>Customer Obsession</option>
+        <option>Ownership</option>
+        <option>Invent and Simplify</option>
+        <option>Are Right A Lot</option>
+        <option>Learn and Be Curious</option>
+        <option>Hire and Develop the Best</option>
+        <option>Insist on the Highest Standards</option>
+        <option>Think Big</option>
+        <option>Bias for Action</option>
+        <option>Frugality</option>
+        <option>Earn Trust</option>
+        <option>Dive Deep</option>
+        <option>Have Backbone; Disagree and Commit</option>
+        <option>Deliver Results</option>
+        <option>Strive to be Earth's Best Employer</option>
+        <option>Success and Scale Bring Broad Responsibility</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="input-answer">Model Answer</label>
+      <textarea id="input-answer" style="min-height:160px;" placeholder="Write a strong model answer here. Use STAR format: Situation, Task, Action, Result."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="saveQuestion()">Save Question</button>
+      <button class="btn-secondary" onclick="showView('practice')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ALL QUESTIONS VIEW -->
+<div class="view" id="view-all">
+  <div class="view-header">
+    <h2>All Questions</h2>
+    <button class="btn-primary" onclick="showView('add')">+ Add Question</button>
+  </div>
+
+  <div id="all-empty" class="empty-state" style="display:none;">
+    <span class="big">&#128218;</span>
+    <p>No questions saved yet.</p>
+  </div>
+
+  <div class="q-list" id="q-list"></div>
+</div>
+
+<div class="success-toast" id="toast">Question saved!</div>
+
+<script>
+  const STORAGE_KEY = 'amzn_cards';
+  let cards = [];
+  let shuffled = [];
+  let currentIndex = 0;
+
+  function load() {
+    try { cards = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { cards = []; }
+  }
+
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  }
+
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function updateNavCount() {
+    const el = document.getElementById('nav-count');
+    el.textContent = cards.length === 0 ? '' : cards.length + ' card' + (cards.length !== 1 ? 's' : '');
+  }
+
+  // VIEW SWITCHING
+  function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+
+    if (name === 'practice') renderPractice();
+    if (name === 'all') renderAll();
+  }
+
+  // PRACTICE
+  function renderPractice() {
+    load();
+    updateNavCount();
+    const empty = document.getElementById('practice-empty');
+    const card = document.getElementById('practice-card');
+
+    if (cards.length === 0) {
+      empty.style.display = 'flex';
+      card.style.display = 'none';
+      return;
+    }
+
+    empty.style.display = 'none';
+    card.style.display = 'flex';
+
+    shuffled = shuffle(cards);
+    currentIndex = 0;
+    showCard();
+  }
+
+  function showCard() {
+    if (shuffled.length === 0) return;
+    if (currentIndex >= shuffled.length) {
+      shuffled = shuffle(cards);
+      currentIndex = 0;
+    }
+
+    const c = shuffled[currentIndex];
+    document.getElementById('card-question').textContent = c.question;
+    document.getElementById('card-lp').textContent = c.lp || 'General';
+    document.getElementById('my-answer').value = '';
+    document.getElementById('model-answer-text').textContent = c.answer;
+    document.getElementById('reveal-section').classList.remove('shown');
+    document.getElementById('btn-reveal').textContent = c.answer ? 'Reveal Answer' : 'Save Answer';
+  }
+
+  function revealAnswer() {
+    const c = shuffled[currentIndex];
+    const myAnswer = document.getElementById('my-answer').value.trim();
+    // If no model answer yet and user typed something, save it as the model answer
+    if (myAnswer && c && !c.answer) {
+      load();
+      const idx = cards.findIndex(x => x.id === c.id);
+      if (idx !== -1) {
+        cards[idx].answer = myAnswer;
+        save();
+        c.answer = myAnswer;
+        document.getElementById('model-answer-text').textContent = myAnswer;
+        document.getElementById('btn-reveal').textContent = 'Reveal Answer';
+        showToast('Answer saved as model answer!');
+      }
+    }
+    document.getElementById('reveal-section').classList.add('shown');
+  }
+
+  function nextCard() {
+    currentIndex++;
+    showCard();
+  }
+
+  // ADD QUESTION
+  function saveQuestion() {
+    const question = document.getElementById('input-question').value.trim();
+    const lp = document.getElementById('input-lp').value;
+    const answer = document.getElementById('input-answer').value.trim();
+
+    if (!question) { alert('Please enter a question.'); return; }
+    if (!lp) { alert('Please select a Leadership Principle.'); return; }
+    if (!answer) { alert('Please enter a model answer.'); return; }
+
+    load();
+    cards.push({ id: uid(), question, lp, answer, createdAt: new Date().toISOString().slice(0,10) });
+    save();
+
+    // clear form
+    document.getElementById('input-question').value = '';
+    document.getElementById('input-lp').value = '';
+    document.getElementById('input-answer').value = '';
+
+    showToast('Question saved!');
+    updateNavCount();
+    showView('practice');
+  }
+
+  // ALL QUESTIONS
+  function renderAll() {
+    load();
+    updateNavCount();
+    const list = document.getElementById('q-list');
+    const empty = document.getElementById('all-empty');
+    list.innerHTML = '';
+
+    if (cards.length === 0) {
+      empty.style.display = 'flex';
+      return;
+    }
+    empty.style.display = 'none';
+
+    // Group by LP
+    const groups = {};
+    cards.forEach(c => {
+      const key = c.lp || 'General';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(c);
+    });
+
+    Object.keys(groups).sort().forEach(lp => {
+      const label = document.createElement('div');
+      label.className = 'section-label';
+      label.textContent = lp + ' (' + groups[lp].length + ')';
+      list.appendChild(label);
+
+      groups[lp].forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'q-item';
+        item.innerHTML = `
+          <div class="q-item-header" onclick="toggleItem(this)">
+            <span class="q-item-question">${escHtml(c.question)}</span>
+            <span class="lp-badge" style="display:none;">${escHtml(c.lp)}</span>
+            <span class="q-item-chevron">&#9660;</span>
+          </div>
+          <div class="q-item-body">
+            <div class="answer-label">Model Answer</div>
+            <div class="q-item-answer" id="ans-display-${c.id}" style="${c.answer ? '' : 'color:var(--text-dim);font-style:italic;'}">${c.answer ? escHtml(c.answer) : 'No answer yet — click Edit to add one.'}</div>
+            <textarea class="q-item-edit-area" id="ans-edit-${c.id}" style="display:none;min-height:130px;" placeholder="Write your model answer here...">${escHtml(c.answer)}</textarea>
+            <div class="btn-row">
+              <button class="btn-secondary" id="btn-edit-${c.id}" onclick="startEdit('${c.id}')">Edit Answer</button>
+              <button class="btn-primary" id="btn-save-${c.id}" onclick="saveEdit('${c.id}')" style="display:none;">Save Answer</button>
+              <button class="btn-secondary" id="btn-cancel-${c.id}" onclick="cancelEdit('${c.id}')" style="display:none;">Cancel</button>
+              <button class="btn-danger" onclick="deleteCard('${c.id}')">Delete</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    });
+  }
+
+  function toggleItem(header) {
+    header.closest('.q-item').classList.toggle('open');
+  }
+
+  function startEdit(id) {
+    document.getElementById('ans-display-' + id).style.display = 'none';
+    document.getElementById('ans-edit-' + id).style.display = 'block';
+    document.getElementById('btn-edit-' + id).style.display = 'none';
+    document.getElementById('btn-save-' + id).style.display = 'inline-block';
+    document.getElementById('btn-cancel-' + id).style.display = 'inline-block';
+    document.getElementById('ans-edit-' + id).focus();
+  }
+
+  function cancelEdit(id) {
+    load();
+    const c = cards.find(x => x.id === id);
+    const ta = document.getElementById('ans-edit-' + id);
+    ta.value = c ? c.answer : '';
+    document.getElementById('ans-display-' + id).style.display = 'block';
+    ta.style.display = 'none';
+    document.getElementById('btn-edit-' + id).style.display = 'inline-block';
+    document.getElementById('btn-save-' + id).style.display = 'none';
+    document.getElementById('btn-cancel-' + id).style.display = 'none';
+  }
+
+  function saveEdit(id) {
+    load();
+    const answer = document.getElementById('ans-edit-' + id).value.trim();
+    const idx = cards.findIndex(x => x.id === id);
+    if (idx === -1) return;
+    cards[idx].answer = answer;
+    save();
+    const display = document.getElementById('ans-display-' + id);
+    if (answer) {
+      display.textContent = answer;
+      display.style.color = '';
+      display.style.fontStyle = '';
+    } else {
+      display.textContent = 'No answer yet — click Edit to add one.';
+      display.style.color = 'var(--text-dim)';
+      display.style.fontStyle = 'italic';
+    }
+    document.getElementById('ans-display-' + id).style.display = 'block';
+    document.getElementById('ans-edit-' + id).style.display = 'none';
+    document.getElementById('btn-edit-' + id).style.display = 'inline-block';
+    document.getElementById('btn-save-' + id).style.display = 'none';
+    document.getElementById('btn-cancel-' + id).style.display = 'none';
+    showToast('Answer saved!');
+    // keep shuffled deck in sync
+    const ci = shuffled.findIndex(x => x.id === id);
+    if (ci !== -1) shuffled[ci].answer = answer;
+    if (currentIndex < shuffled.length && shuffled[currentIndex].id === id) {
+      document.getElementById('model-answer-text').textContent = answer;
+    }
+  }
+
+  function deleteCard(id) {
+    if (!confirm('Delete this question?')) return;
+    load();
+    cards = cards.filter(c => c.id !== id);
+    save();
+    renderAll();
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // TOAST
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // SEED — add preset questions if none exist yet
+  function seedQuestions() {
+    load();
+    if (cards.length > 0) return;
+    const preset = [{"question":"Tell me about a time you had to deal with a difficult customer","lp":"Customer Obsession"},{"question":"Tell me about one of your projects where you put the customer first","lp":"Customer Obsession"},{"question":"Which company has the best customer service and why?","lp":"Customer Obsession"},{"question":"Describe a time when a customer asked you for one thing, but you knew that they needed something else","lp":"Customer Obsession"},{"question":"Tell me about a time you did something at work that wasn't your responsibility / in your job description","lp":"Ownership"},{"question":"Tell me about a time when you went over and above your job responsibility in order to help the company","lp":"Ownership"},{"question":"Tell me about a time when you had to make an important decision without approval from your boss","lp":"Ownership"},{"question":"How would you make Amazon.com better?","lp":"Invent and Simplify"},{"question":"Tell me about a time you had to make an urgent decision without data","lp":"Bias for Action"},{"question":"Tell me about a time when you launched a feature with known risks","lp":"Bias for Action"},{"question":"Tell me about a time when you found an opportunity that no one else saw","lp":"Think Big"},{"question":"Tell me about a time you had a conflict with a coworker or manager and how you approached it","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time your work was criticized","lp":"Earn Trust"},{"question":"Tell me about a time when people in your team didn't agree with you","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time you had a conflict with your team but decided to go ahead with their proposal","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time you re-designed a process and why","lp":"Invent and Simplify"},{"question":"Tell me about a time you solved a big problem in your company","lp":"Deliver Results"},{"question":"Tell me about a time when you had a plan but ran into some obstacles. What did you do about it?","lp":"Deliver Results"},{"question":"What is the most innovative idea you've ever had?","lp":"Invent and Simplify"},{"question":"Tell me about a project in which you had to deep dive into analysis","lp":"Dive Deep"},{"question":"Tell me about the most complex problem you have worked on","lp":"Dive Deep"},{"question":"Tell me about a time when you used a lot of data in a short period of time","lp":"Dive Deep"},{"question":"Tell me how you deal with ambiguity","lp":"Are Right A Lot"},{"question":"Tell me about a time when you were faced with a problem that had a number of possible solutions","lp":"Are Right A Lot"},{"question":"Tell me about a time you applied judgment to a decision when data was not available","lp":"Are Right A Lot"},{"question":"Tell me about a time you came across a scenario where the deadline given to you for a project was earlier than expected","lp":"Deliver Results"},{"question":"Tell me about the most challenging project you ever worked on","lp":"Deliver Results"},{"question":"Tell me about a time when you had to handle pressure","lp":"Deliver Results"},{"question":"Tell me about a time when you had two deadlines at the same time. How did you manage the situation?","lp":"Deliver Results"},{"question":"How do you prioritize tasks in your current role?","lp":"Deliver Results"},{"question":"Tell me about your most significant accomplishment. Why was it significant?","lp":"Deliver Results"},{"question":"Tell me about a time you proposed a non-intuitive solution to a problem and how you identified that it required a different way of thinking","lp":"Invent and Simplify"},{"question":"What was the largest project you've executed?","lp":"Think Big"},{"question":"Tell me about a time you provided feedback that was helpful to a peer","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you hired or worked with people smarter than you are","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you stepped in to help a struggling teammate","lp":"Hire and Develop the Best"},{"question":"Who is your best employee/resource, and what makes them the best?","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you successfully delivered a project with limited budget or resources","lp":"Frugality"},{"question":"Tell me about the last time you figured out a way to keep an approach simple or to save on expenses","lp":"Frugality"},{"question":"When managing a budget, what are some ways you get more out of less?","lp":"Frugality"},{"question":"Tell me about a time you had to learn something quickly","lp":"Learn and Be Curious"},{"question":"Tell me about your biggest career failure and what you learned from it","lp":"Learn and Be Curious"},{"question":"Tell me about a time you taught yourself a skill","lp":"Learn and Be Curious"},{"question":"Tell me about something you learned that made you better at your job","lp":"Learn and Be Curious"},{"question":"Tell me about the most successful project you've done","lp":"Insist on the Highest Standards"},{"question":"Tell me about a project that you wish you had done better, and how you would do it differently today","lp":"Insist on the Highest Standards"},{"question":"Tell me a time when you had a goal that was hard to achieve. What did you learn from that?","lp":"Insist on the Highest Standards"},{"question":"How would you improve this project on your resume if you had more time?","lp":"Insist on the Highest Standards"},{"question":"How do you earn trust with a team?","lp":"Earn Trust"},{"question":"Tell me a piece of difficult feedback you received and how you handled it","lp":"Earn Trust"},{"question":"A co-worker constantly arrives late to a recurring meeting. What would you do?","lp":"Earn Trust"},{"question":"How do you manage a low performer in the team?","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time that you went above and beyond for an employee","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time you saw an issue that would negatively impact your team. How did you deal with it?","lp":"Strive to be Earth's Best Employer"},{"question":"How do you identify a good performer in the team and help in their career growth?","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time when you made a decision that impacted the team or the company","lp":"Ownership"},{"question":"Tell me about a decision that you made about your work and you regret now","lp":"Learn and Be Curious"},{"question":"Tell me about a time when you failed to do the right thing","lp":"Success and Scale Bring Broad Responsibility"}];
+    cards = preset.map(p => ({ id: uid(), question: p.question, lp: p.lp, answer: '', createdAt: new Date().toISOString().slice(0,10) }));
+    save();
+  }
+
+  // INIT
+  seedQuestions();
+  load();
+  updateNavCount();
+  renderPractice();
+</script>
+</body>
+</html>
