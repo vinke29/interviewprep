@@ -180,60 +180,93 @@
       z-index: 100;
       align-items: center;
       justify-content: center;
+      padding: 24px;
     }
     .login-screen.show { display: flex; }
 
     .login-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 40px 36px;
+      border-radius: 20px;
+      padding: 48px 40px;
       width: 100%;
-      max-width: 380px;
+      max-width: 400px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 28px;
     }
 
     .login-logo {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 800;
       color: var(--accent);
+      letter-spacing: -0.2px;
+    }
+
+    .login-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .login-title {
-      font-size: 1.5rem;
+      font-size: 1.75rem;
       font-weight: 800;
-      letter-spacing: -0.4px;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
     }
 
     .login-subtitle {
       font-size: 0.88rem;
       color: var(--text-dim);
-      line-height: 1.5;
-      margin-top: -8px;
+      line-height: 1.55;
+    }
+
+    .login-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .login-input:focus { border-color: var(--accent); }
+    .login-input::placeholder { color: var(--text-dim); }
+
+    .login-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .login-sent {
       display: none;
       text-align: center;
-      padding: 12px 0;
+      padding: 8px 0;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
+    .login-sent.show { display: flex; }
 
     .login-sent-icon {
-      font-size: 2.5rem;
-      margin-bottom: 12px;
+      font-size: 2.8rem;
+      line-height: 1;
     }
 
     .login-sent-title {
       font-weight: 700;
-      margin-bottom: 6px;
+      font-size: 1.05rem;
     }
 
     .login-sent-sub {
       font-size: 0.85rem;
       color: var(--text-dim);
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     /* VIEWS */
@@ -689,18 +722,17 @@
 <div class="login-screen" id="login-screen">
   <div class="login-card">
     <div class="login-logo">&#9654; Interview Prep</div>
-    <div>
+    <div class="login-heading">
       <div class="login-title">Sign in</div>
       <div class="login-subtitle">Enter your email and we'll send you a magic link — no password needed.</div>
     </div>
-    <div id="login-form-area">
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <input class="form-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email" />
-        <button class="btn-primary" style="width:100%;" onclick="sendMagicLink()">Send Magic Link</button>
-      </div>
+    <div class="login-fields" id="login-form-area">
+      <input class="login-input" id="login-email" type="email" placeholder="you@example.com" autocomplete="email"
+        onkeydown="if(event.key==='Enter') sendMagicLink()" />
+      <button class="btn-primary" style="width:100%;padding:12px 0;font-size:0.95rem;" onclick="sendMagicLink()">Send Magic Link</button>
     </div>
     <div class="login-sent" id="login-sent">
-      <div class="login-sent-icon">&#9993;</div>
+      <div class="login-sent-icon">&#9993;&#65039;</div>
       <div class="login-sent-title">Check your inbox</div>
       <div class="login-sent-sub" id="login-sent-sub"></div>
     </div>
@@ -931,8 +963,7 @@
       });
       if (res.ok) {
         document.getElementById('login-form-area').style.display = 'none';
-        const sent = document.getElementById('login-sent');
-        sent.style.display = 'block';
+        document.getElementById('login-sent').classList.add('show');
         document.getElementById('login-sent-sub').textContent =
           'We sent a link to ' + email + '. Click it to sign in — it expires in 1 hour.';
       } else {
@@ -997,8 +1028,8 @@
     activeSet = null; activeSetKey = '';
     document.getElementById('nav-auth-area').style.display = 'none';
     document.getElementById('login-screen').classList.add('show');
-    document.getElementById('login-form-area').style.display = '';
-    document.getElementById('login-sent').style.display = 'none';
+    document.getElementById('login-form-area').style.display = 'flex';
+    document.getElementById('login-sent').classList.remove('show');
     const btn = document.querySelector('#login-form-area .btn-primary');
     if (btn) { btn.textContent = 'Send Magic Link'; btn.disabled = false; }
     document.getElementById('login-email').value = '';
