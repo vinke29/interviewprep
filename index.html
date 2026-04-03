@@ -740,36 +740,56 @@
   let shuffled = [];
   let currentIndex = 0;
 
+  // Hardcoded Amazon preset — used as fallback if localStorage is empty/broken
+  const AMAZON_PRESET = [{"question":"Tell me about a time you had to deal with a difficult customer","lp":"Customer Obsession"},{"question":"Tell me about one of your projects where you put the customer first","lp":"Customer Obsession"},{"question":"Which company has the best customer service and why?","lp":"Customer Obsession"},{"question":"Describe a time when a customer asked you for one thing, but you knew that they needed something else","lp":"Customer Obsession"},{"question":"Tell me about a time you did something at work that wasn't your responsibility / in your job description","lp":"Ownership"},{"question":"Tell me about a time when you went over and above your job responsibility in order to help the company","lp":"Ownership"},{"question":"Tell me about a time when you had to make an important decision without approval from your boss","lp":"Ownership"},{"question":"How would you make Amazon.com better?","lp":"Invent and Simplify"},{"question":"Tell me about a time you had to make an urgent decision without data","lp":"Bias for Action"},{"question":"Tell me about a time when you launched a feature with known risks","lp":"Bias for Action"},{"question":"Tell me about a time when you found an opportunity that no one else saw","lp":"Think Big"},{"question":"Tell me about a time you had a conflict with a coworker or manager and how you approached it","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time your work was criticized","lp":"Earn Trust"},{"question":"Tell me about a time when people in your team didn't agree with you","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time you had a conflict with your team but decided to go ahead with their proposal","lp":"Have Backbone; Disagree and Commit"},{"question":"Tell me about a time you re-designed a process and why","lp":"Invent and Simplify"},{"question":"Tell me about a time you solved a big problem in your company","lp":"Deliver Results"},{"question":"Tell me about a time when you had a plan but ran into some obstacles. What did you do about it?","lp":"Deliver Results"},{"question":"What is the most innovative idea you've ever had?","lp":"Invent and Simplify"},{"question":"Tell me about a project in which you had to deep dive into analysis","lp":"Dive Deep"},{"question":"Tell me about the most complex problem you have worked on","lp":"Dive Deep"},{"question":"Tell me about a time when you used a lot of data in a short period of time","lp":"Dive Deep"},{"question":"Tell me how you deal with ambiguity","lp":"Are Right A Lot"},{"question":"Tell me about a time when you were faced with a problem that had a number of possible solutions","lp":"Are Right A Lot"},{"question":"Tell me about a time you applied judgment to a decision when data was not available","lp":"Are Right A Lot"},{"question":"Tell me about a time you came across a scenario where the deadline given to you for a project was earlier than expected","lp":"Deliver Results"},{"question":"Tell me about the most challenging project you ever worked on","lp":"Deliver Results"},{"question":"Tell me about a time when you had to handle pressure","lp":"Deliver Results"},{"question":"Tell me about a time when you had two deadlines at the same time. How did you manage the situation?","lp":"Deliver Results"},{"question":"How do you prioritize tasks in your current role?","lp":"Deliver Results"},{"question":"Tell me about your most significant accomplishment. Why was it significant?","lp":"Deliver Results"},{"question":"Tell me about a time you proposed a non-intuitive solution to a problem and how you identified that it required a different way of thinking","lp":"Invent and Simplify"},{"question":"What was the largest project you've executed?","lp":"Think Big"},{"question":"Tell me about a time you provided feedback that was helpful to a peer","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you hired or worked with people smarter than you are","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you stepped in to help a struggling teammate","lp":"Hire and Develop the Best"},{"question":"Who is your best employee/resource, and what makes them the best?","lp":"Hire and Develop the Best"},{"question":"Tell me about a time you successfully delivered a project with limited budget or resources","lp":"Frugality"},{"question":"Tell me about the last time you figured out a way to keep an approach simple or to save on expenses","lp":"Frugality"},{"question":"When managing a budget, what are some ways you get more out of less?","lp":"Frugality"},{"question":"Tell me about a time you had to learn something quickly","lp":"Learn and Be Curious"},{"question":"Tell me about your biggest career failure and what you learned from it","lp":"Learn and Be Curious"},{"question":"Tell me about a time you taught yourself a skill","lp":"Learn and Be Curious"},{"question":"Tell me about something you learned that made you better at your job","lp":"Learn and Be Curious"},{"question":"Tell me about the most successful project you've done","lp":"Insist on the Highest Standards"},{"question":"Tell me about a project that you wish you had done better, and how you would do it differently today","lp":"Insist on the Highest Standards"},{"question":"Tell me a time when you had a goal that was hard to achieve. What did you learn from that?","lp":"Insist on the Highest Standards"},{"question":"How would you improve this project on your resume if you had more time?","lp":"Insist on the Highest Standards"},{"question":"How do you earn trust with a team?","lp":"Earn Trust"},{"question":"Tell me a piece of difficult feedback you received and how you handled it","lp":"Earn Trust"},{"question":"A co-worker constantly arrives late to a recurring meeting. What would you do?","lp":"Earn Trust"},{"question":"How do you manage a low performer in the team?","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time that you went above and beyond for an employee","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time you saw an issue that would negatively impact your team. How did you deal with it?","lp":"Strive to be Earth's Best Employer"},{"question":"How do you identify a good performer in the team and help in their career growth?","lp":"Strive to be Earth's Best Employer"},{"question":"Tell me about a time when you made a decision that impacted the team or the company","lp":"Ownership"},{"question":"Tell me about a decision that you made about your work and you regret now","lp":"Learn and Be Curious"},{"question":"Tell me about a time when you failed to do the right thing","lp":"Success and Scale Bring Broad Responsibility"}];
+
   // ── STORAGE ──────────────────────────────────────────────
   function loadSets() {
     try { allSets = JSON.parse(localStorage.getItem(SETS_KEY)) || {}; }
     catch { allSets = {}; }
 
-    // Migrate legacy amzn_cards, or repair a broken amazon| entry with no questions
-    const legacyRaw = localStorage.getItem(LEGACY_KEY);
-    if (legacyRaw) {
+    // Repair amazon| if missing or has empty questions (migration may have run before questions existed)
+    const existing = allSets['amazon|'];
+    const needsRepair = !existing || !existing.questions || existing.questions.length === 0;
+    if (needsRepair) {
+      // Try legacy format first
+      let questions = null;
       try {
-        const legacy = JSON.parse(legacyRaw) || [];
-        const existing = allSets['amazon|'];
-        const needsMigration = !existing || !existing.questions || existing.questions.length === 0;
-        if (legacy.length && needsMigration) {
-          allSets['amazon|'] = {
-            company: 'Amazon',
-            role: '',
-            frameworks: ['Customer Obsession','Ownership','Invent and Simplify','Are Right A Lot','Learn and Be Curious','Hire and Develop the Best','Insist on the Highest Standards','Think Big','Bias for Action','Frugality','Earn Trust','Dive Deep','Have Backbone; Disagree and Commit','Deliver Results','Strive to be Earth\'s Best Employer','Success and Scale Bring Broad Responsibility'],
-            generatedAt: new Date().toISOString().slice(0,10),
-            questions: legacy.map(c => ({
-              id: c.id,
-              question: c.question,
-              category: c.lp || 'General',
-              type: 'behavioral',
-              sampleAnswer: c.answer || '',
-              userAnswer: c.userAnswer || ''
-            }))
-          };
-          saveSets();
+        const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]');
+        if (legacy.length) {
+          questions = legacy.map(c => ({
+            id: c.id || uid(),
+            question: c.question,
+            category: c.lp || 'General',
+            type: 'behavioral',
+            sampleAnswer: c.answer || '',
+            userAnswer: c.userAnswer || ''
+          }));
         }
       } catch(e) {}
+      // Fall back to hardcoded preset
+      if (!questions) {
+        questions = AMAZON_PRESET.map(p => ({
+          id: uid(),
+          question: p.question,
+          category: p.lp,
+          type: 'behavioral',
+          sampleAnswer: existing && existing.questions
+            ? (existing.questions.find(q => q.question === p.question) || {}).sampleAnswer || ''
+            : '',
+          userAnswer: existing && existing.questions
+            ? (existing.questions.find(q => q.question === p.question) || {}).userAnswer || ''
+            : ''
+        }));
+      }
+      allSets['amazon|'] = {
+        company: 'Amazon',
+        role: '',
+        frameworks: ['Customer Obsession','Ownership','Invent and Simplify','Are Right A Lot','Learn and Be Curious','Hire and Develop the Best','Insist on the Highest Standards','Think Big','Bias for Action','Frugality','Earn Trust','Dive Deep','Have Backbone; Disagree and Commit','Deliver Results','Strive to be Earth\'s Best Employer','Success and Scale Bring Broad Responsibility'],
+        generatedAt: (existing && existing.generatedAt) || new Date().toISOString().slice(0,10),
+        questions
+      };
+      saveSets();
     }
   }
 
