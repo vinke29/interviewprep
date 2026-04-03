@@ -32,18 +32,21 @@
       flex-direction: column;
     }
 
-    /* NAV */
-    nav {
+    /* NAV — 3 layers */
+    .nav-layer {
       background: var(--surface);
-      border-bottom: 1px solid var(--border);
       padding: 0 28px;
       display: flex;
       align-items: center;
-      gap: 4px;
-      height: 52px;
       position: sticky;
-      top: 0;
       z-index: 10;
+    }
+
+    /* Layer 1: app bar */
+    #nav-app {
+      top: 0;
+      height: 48px;
+      border-bottom: 1px solid var(--border);
     }
 
     .nav-logo {
@@ -51,73 +54,78 @@
       font-size: 0.95rem;
       color: var(--accent);
       letter-spacing: -0.3px;
-      margin-right: 4px;
     }
 
-    .nav-sep {
-      color: var(--border);
-      font-size: 1.1rem;
-      font-weight: 300;
-      margin: 0 6px;
-      user-select: none;
+    /* Layer 2: company bar */
+    #nav-company-bar {
+      top: 48px;
+      height: 40px;
+      border-bottom: 1px solid var(--border);
+      gap: 10px;
+      display: none;
     }
 
-    .nav-company-name {
-      font-size: 0.9rem;
-      font-weight: 600;
+    .nav-company-label {
+      font-size: 0.88rem;
+      font-weight: 700;
       color: var(--text);
+      flex: 1;
     }
 
-    .nav-divider {
-      width: 1px;
-      height: 16px;
-      background: var(--border);
-      margin: 0 8px;
+    .nav-company-role {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-weight: 400;
     }
 
-    .nav-btn {
+    .nav-switch-btn {
       background: none;
       border: none;
       color: var(--text-dim);
       cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
+      padding: 4px 0;
+      font-size: 0.78rem;
       font-weight: 500;
-      transition: all 0.15s;
+      transition: color 0.15s;
+      font-family: inherit;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      text-decoration-color: var(--border);
     }
 
-    .nav-btn:hover { color: var(--text); }
-    .nav-btn.active { color: var(--text); font-weight: 600; }
-    .nav-btn.active::after {
-      content: '';
-      display: block;
-      height: 2px;
-      background: var(--accent);
-      border-radius: 2px;
-      margin-top: 2px;
+    .nav-switch-btn:hover { color: var(--text); text-decoration-color: var(--text-dim); }
+
+    /* Layer 3: tabs bar */
+    #nav-tabs {
+      top: 88px;
+      height: 40px;
+      border-bottom: 1px solid var(--border);
+      gap: 2px;
+      display: none;
     }
 
-    .nav-spacer { flex: 1; }
-
-    .nav-switch-btn {
+    .nav-tab {
       background: none;
-      border: 1px solid var(--border);
+      border: none;
       color: var(--text-dim);
       cursor: pointer;
-      padding: 5px 12px;
-      border-radius: 6px;
-      font-size: 0.8rem;
+      padding: 0 14px;
+      height: 40px;
+      font-size: 0.83rem;
       font-weight: 500;
       transition: all 0.15s;
       font-family: inherit;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
     }
 
-    .nav-switch-btn:hover { border-color: var(--text-dim); color: var(--text); }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
 
     /* VIEWS */
     .view { display: none; flex: 1; padding: 40px 24px 60px; max-width: 680px; margin: 0 auto; width: 100%; }
     .view.active { display: flex; flex-direction: column; gap: 20px; }
+    body.in-set .view { padding-top: 32px; }
 
     /* ── HOME VIEW ── */
     .home-hero {
@@ -563,23 +571,23 @@
 </head>
 <body>
 
-<!-- NAV: home mode (no active set) -->
-<nav id="nav-home-mode">
+<!-- Layer 1: always visible app bar -->
+<div class="nav-layer" id="nav-app">
   <span class="nav-logo">&#9654; Interview Prep</span>
-</nav>
+</div>
 
-<!-- NAV: set mode (inside a company set) -->
-<nav id="nav-set-mode" style="display:none;">
-  <span class="nav-logo">&#9654; Interview Prep</span>
-  <span class="nav-sep">/</span>
-  <span class="nav-company-name" id="nav-company-badge"></span>
-  <div class="nav-divider"></div>
-  <button class="nav-btn active" onclick="showView('practice')" id="nav-practice">Practice</button>
-  <button class="nav-btn" onclick="showView('all')" id="nav-all">All Questions</button>
-  <button class="nav-btn" onclick="showView('add')" id="nav-add">+ Add</button>
-  <div class="nav-spacer"></div>
-  <button class="nav-switch-btn" onclick="switchCompany()">Switch Company</button>
-</nav>
+<!-- Layer 2: company bar (visible when a set is active) -->
+<div class="nav-layer" id="nav-company-bar">
+  <span class="nav-company-label" id="nav-company-name"></span>
+  <button class="nav-switch-btn" onclick="switchCompany()">Switch company</button>
+</div>
+
+<!-- Layer 3: tabs (visible when a set is active) -->
+<div class="nav-layer" id="nav-tabs">
+  <button class="nav-tab" onclick="showView('practice')" id="nav-practice">Practice</button>
+  <button class="nav-tab" onclick="showView('all')" id="nav-all">All Questions</button>
+  <button class="nav-tab" onclick="showView('add')" id="nav-add">+ Add Question</button>
+</div>
 
 <!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loading-overlay">
@@ -737,11 +745,14 @@
     try { allSets = JSON.parse(localStorage.getItem(SETS_KEY)) || {}; }
     catch { allSets = {}; }
 
-    // Migrate legacy amzn_cards
-    if (!allSets['amazon|'] && localStorage.getItem(LEGACY_KEY)) {
+    // Migrate legacy amzn_cards, or repair a broken amazon| entry with no questions
+    const legacyRaw = localStorage.getItem(LEGACY_KEY);
+    if (legacyRaw) {
       try {
-        const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY)) || [];
-        if (legacy.length) {
+        const legacy = JSON.parse(legacyRaw) || [];
+        const existing = allSets['amazon|'];
+        const needsMigration = !existing || !existing.questions || existing.questions.length === 0;
+        if (legacy.length && needsMigration) {
           allSets['amazon|'] = {
             company: 'Amazon',
             role: '',
@@ -753,7 +764,7 @@
               category: c.lp || 'General',
               type: 'behavioral',
               sampleAnswer: c.answer || '',
-              userAnswer: ''
+              userAnswer: c.userAnswer || ''
             }))
           };
           saveSets();
@@ -780,18 +791,16 @@
     document.getElementById('view-' + name).classList.add('active');
 
     const inSet = !!activeSet;
-    document.getElementById('nav-home-mode').style.display = inSet ? 'none' : '';
-    document.getElementById('nav-set-mode').style.display = inSet ? '' : 'none';
+    document.getElementById('nav-company-bar').style.display = inSet ? '' : 'none';
+    document.getElementById('nav-tabs').style.display = inSet ? '' : 'none';
+    document.body.classList.toggle('in-set', inSet);
 
     if (inSet) {
-      // update active nav button
       ['practice','all','add'].forEach(v => {
         document.getElementById('nav-' + v).classList.toggle('active', v === name);
       });
-      document.getElementById('nav-company-badge').textContent =
-        activeSet.company + (activeSet.role ? ' · ' + activeSet.role : '');
-      document.getElementById('nav-count').textContent =
-        activeSet.questions.length + ' questions';
+      const label = activeSet.company + (activeSet.role ? ' · ' + activeSet.role : '');
+      document.getElementById('nav-company-name').textContent = label;
     }
 
     if (name === 'home') renderHome();
